@@ -1,0 +1,346 @@
+.h {
+	color: #ffbf2c;
+}
+
+html, body {
+    width: 100%;
+    height: 100%;
+    margin:0; padding:0;
+    overflow-x: hidden;
+}
+
+/* playlist controls */
+.vjs-default-skin .vjs-pn-control {
+	float: right;
+}
+
+.vjs-default-skin .vjs-pn-control > div {
+	display: inline-block;
+	width: 36px;
+	height: 36px;
+	cursor: pointer;
+	text-align: center;
+}
+
+.vjs-default-skin .vjs-pn-control > div:after {
+	font-family: 'FOXfont';
+	content: "\e60c";
+	font-size: 16px;
+	/*background: url('player-sprite.png') left top;*/
+	display: inline-block;
+	width: 22px;
+	height: 15px;
+	position: relative;
+	top: 8px;
+
+	-webkit-transition: color 325ms ease;
+	-moz-transition: color    325ms ease;
+	-ms-transition: color     325ms ease;
+	-o-transition: color      325ms ease;
+	transition: color         325ms ease;
+}
+
+.vjs-default-skin .vjs-pn-control > .vjs-next-btn:after {
+	content: "\e601";
+}
+
+.vjs-default-skin .vjs-pn-control > .vjs-next-btn:hover:after,
+.vjs-default-skin .vjs-pn-control > .vjs-prev-btn:hover:after,
+.vjs-default-skin .vjs-fullscreen-control:hover:before,
+.vjs-top-bar .vjs-collaps:hover:after,
+.vjs-top-bar .vjs-close:hover:after,
+.fox_collapse_bl .fox_close_player:hover:after,
+.fox_collapse_bl .fox_expand_player:hover:after {
+	color: #ffbf2c;
+}
+
+
+
+/* fullscreen */
+.vjs-default-skin .vjs-fullscreen-control:before {
+  font-family: 'FOXfont';
+  content: "\e603";
+  font-size: 16px;
+  display: inline-block;
+  width: 22px;
+  height: 16px;
+  position: relative;
+}
+
+.vjs-default-skin.vjs-fullscreen .vjs-fullscreen-control:before {
+  content: "\e604";
+}
+
+.vjs-user-active .vjs-top-bar,
+.vjs-paused  .vjs-top-bar{
+	visibility: visible !important;
+	opacity: 1 !important;
+}
+
+.vjs-user-inactive .vjs-top-bar {
+	visibility: hidden;
+	opacity: 0;
+}
+
+
+
+
+/* top bar */
+.vjs-top-bar {
+	position: absolute;
+	top: 0; left: 0; right: 0;
+	height: 60px;
+	z-index: 99;
+	font-size: 18px;
+	line-height: 60px;
+	padding-left: 20px;
+	padding-right: 5px;
+	cursor: move;
+
+	/* Permalink - use to edit and share this gradient: http://colorzilla.com/gradient-editor/#000000+0,000000+100&amp;0.25+0,0+100;Neutral+Density */
+background: -moz-linear-gradient(top,  rgba(0,0,0,0.25) 0%, rgba(0,0,0,0) 100%); /* FF3.6+ */
+background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,rgba(0,0,0,0.25)), color-stop(100%,rgba(0,0,0,0))); /* Chrome,Safari4+ */
+background: -webkit-linear-gradient(top,  rgba(0,0,0,0.25) 0%,rgba(0,0,0,0) 100%); /* Chrome10+,Safari5.1+ */
+background: -o-linear-gradient(top,  rgba(0,0,0,0.25) 0%,rgba(0,0,0,0) 100%); /* Opera 11.10+ */
+background: -ms-linear-gradient(top,  rgba(0,0,0,0.25) 0%,rgba(0,0,0,0) 100%); /* IE10+ */
+background: linear-gradient(to bottom,  rgba(0,0,0,0.25) 0%,rgba(0,0,0,0) 100%); /* W3C */
+filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#40000000', endColorstr='#00000000',GradientType=0 ); /* IE6-9 */
+
+
+
+	-webkit-transition: visibility 1s, opacity 1s;
+  	-moz-transition: visibility 1s, opacity 1s;
+  	-o-transition: visibility 1s, opacity 1s;
+  	transition: visibility 1s, opacity 1s;
+
+}
+
+.vjs-top-bar > div {
+	margin-top: 5px;
+	float: right;
+}
+
+.vjs-top-bar > span {
+	display: inline-block;
+  	max-width: 70%;
+  	white-space: nowrap;
+  	overflow: hidden;
+  	text-overflow: ellipsis;
+}
+
+.vjs-top-bar .vjs-collaps,
+.vjs-top-bar .vjs-close {
+	display: inline-block;
+	width: 50px;
+	height: 50px;
+	text-align: center;
+	cursor: pointer;
+}
+
+
+.vjs-top-bar .vjs-collaps {
+	margin-right: 5px;
+}
+
+.vjs-top-bar .vjs-collaps:after,
+.vjs-top-bar .vjs-close:after {
+	font-family: 'FOXfont';
+  	font-size: 17px;
+	/*background: url('player-sprite.png') left -119px;*/
+	content: "\e605";
+	font-style: normal;
+	display: inline-block;
+	width: 20px;
+	height: 20px;
+	position: relative;
+  	top: -2px;
+
+  	-webkit-transition: color 325ms ease;
+  	-moz-transition: color    325ms ease;
+  	-ms-transition: color     325ms ease;
+  	-o-transition: color      325ms ease;
+  	transition: color         325ms ease;
+}
+
+.vjs-top-bar .vjs-collaps:after {
+	content: "\e606";
+	height: 5px; 
+}
+
+/* time tooltip */
+.vjs-time-tooltip {
+	position: absolute;
+  	padding: 0px 15px;
+  	background-color: rgba(70,70,70,.75);
+  	display: none;
+  	height: 26px;
+  	font-size: 14px;
+  	line-height: 26px;
+  	border-radius: 2px;
+  	top: -37px;
+  	transform: translateX(-50%);
+}
+
+.vjs-time-tooltip:after {
+	content: '';
+	display: block;
+	position: absolute;
+	bottom: -16px;
+	transform: translateX(-50%);
+  	left: 50%;
+  	border-width: 8px;
+  	border-style: solid;
+  	border-color: rgba(70,70,70,.75) transparent transparent;
+	
+}
+
+/**/
+
+.fox_collapse_bl {
+	color: #fff;
+	font-family: Arial;
+	background-color: #2d2d2d;
+	border-radius: 4px 4px 0 0;
+	position: fixed;
+	bottom: 0; right: 25px;
+	width: 270px;
+	height: 31px;
+	display: none;
+	line-height: 31px;
+  	padding-left:10px;
+}
+
+.fox_collapse_bl > div {
+	float: right;
+}
+
+.fox_collapse_bl > span {
+	display: inline-block;
+	max-width: 170px;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+.fox_collapse_bl .fox_close_player,
+.fox_collapse_bl .fox_expand_player {
+	text-align: center;
+	cursor: pointer;
+	display: inline-block;
+	width: 31px;
+	height: 31px;
+}
+
+.fox_collapse_bl .fox_close_player:after,
+.fox_collapse_bl .fox_expand_player:after {
+	content: "\e605";
+	display: inline-block;
+	width: 15px;
+	height: 9px;
+	font-family: 'FOXfont';
+  	font-size: 14px;
+  	font-style: normal;
+}
+
+.fox_collapse_bl .fox_expand_player:after {
+	content: "\e606";
+	position: relative;
+  	top: -8px;
+}
+
+.vjs-proxy-layer {
+	background-color: transparent;
+	position: absolute;
+	top: 0; left: 0; right: 0; bottom: 0;
+	display: none;
+}
+
+/**/
+.vjs-progress-holder .vjs-load-progress,
+.vjs-default-skin .vjs-progress-holder .vjs-play-progress,
+.vjs-line-tooltip
+/*.vjs-default-skin .vjs-progress-holder .vjs-load-progress div*/ {
+	height: 7px !important;
+	top: 6px !important;
+}
+
+.vjs-default-skin .vjs-progress-holder .vjs-load-progress div {
+	display: none !important;
+}
+
+.vjs-default-skin .vjs-fake-progress-holder {
+	display: block;
+	position: absolute;
+	height: 7px;
+	top: 6px; left: 0; right: 0;
+	background-color: rgba(70, 70, 70, .75);
+}
+
+.vjs-progress-holder {
+	background-color: transparent !important;
+}
+
+.vjs-line-tooltip {
+	position: absolute;
+	background-color: rgba(255,255,255,.2);
+	left: 0;
+	width: 0;
+	z-index: 9;
+	display: none;
+}
+
+.vjs-default-skin .vjs-progress-control:hover .vjs-line-tooltip {
+	display: block;
+}
+
+.vjs-default-skin .vjs-volume-bar:after {
+	content: '';
+	display: block;
+	position: absolute;
+	height: 4px;
+	top: 14px; left: 0; right: 0;
+	background-color: rgba(70, 70, 70, .75);
+}
+
+.video-js {
+	outline: none !important;
+}
+
+.vjs-default-skin .vjs-volume-bar .vjs-volume-handle {
+	-webkit-transition: background-color 325ms ease;
+  	-moz-transition:    background-color 325ms ease;
+  	-ms-transition:     background-color 325ms ease;
+  	-o-transition:      background-color 325ms ease;
+  	transition:         background-color 325ms ease;
+}
+
+.vjs-default-skin .vjs-volume-bar:hover .vjs-volume-handle {
+	background-color: #ffbf2c;
+}
+
+.vjs-default-skin .vjs-proxy-bottomshadow {
+	content: '';
+	position: absolute;
+	bottom: 0; left: 0; right: 0;
+	height: 60px;
+
+	/* Permalink - use to edit and share this gradient: http://colorzilla.com/gradient-editor/#000000+0,000000+100&amp;0+0,0.25+100 */
+	background: -moz-linear-gradient(top,  rgba(0,0,0,0) 0%, rgba(0,0,0,0.25) 100%); /* FF3.6+ */
+	background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,rgba(0,0,0,0)), color-stop(100%,rgba(0,0,0,0.25))); /* Chrome,Safari4+ */
+	background: -webkit-linear-gradient(top,  rgba(0,0,0,0) 0%,rgba(0,0,0,0.25) 100%); /* Chrome10+,Safari5.1+ */
+	background: -o-linear-gradient(top,  rgba(0,0,0,0) 0%,rgba(0,0,0,0.25) 100%); /* Opera 11.10+ */
+	background: -ms-linear-gradient(top,  rgba(0,0,0,0) 0%,rgba(0,0,0,0.25) 100%); /* IE10+ */
+	background: linear-gradient(to bottom,  rgba(0,0,0,0) 0%,rgba(0,0,0,0.25) 100%); /* W3C */
+	filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#00000000', endColorstr='#40000000',GradientType=0 ); /* IE6-9 */
+}
+
+.vjs-user-active .vjs-proxy-bottomshadow,
+.vjs-paused  .vjs-proxy-bottomshadow {
+	visibility: visible !important;
+	opacity: 1 !important;
+}
+
+.vjs-user-inactive .vjs-proxy-bottomshadow {
+	visibility: hidden;
+	opacity: 0;
+}

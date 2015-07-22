@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>HTML5 Video Player</title>
+  <meta http-equiv="X-UA-Compatible" content="IE=Edge"/>
+  <meta charset="utf-8">
+  <link rel="stylesheet" href="//ajax.googleapis.com/ajax/libs/jqueryui/1.11.1/themes/smoothness/jquery-ui.css" />
+  <link href="video-js.css" rel="stylesheet" type="text/css">
+  <link href="video-js-custom.css" rel="stylesheet" type="text/css">
+  <script type="text/javascript" src="/js/jquery.min.js"></script>
+  <script type="text/javascript" src="jquery-ui.min.js"></script>
+
+  <style type="text/css">
+  .go_byindex {width: 200px; height: 80px;}
+  </style>
+
+
+  <script src="video.js"></script>
+</head>
+<body>
+
+<video id="fox_player" style="display: none;" controls autoplay class="video-js vjs-default-skin"></video>
+
+
+<div class="fox_collapse_bl">
+	<span></span>
+	<div>
+		<i class="fox_expand_player"></i>
+		<i class="fox_close_player"></i>
+	</div>
+</div>
+
+<button class="go_byindex" data-index="0">1</button>
+<button class="go_byindex" data-index="1">2</button>
+<button class="go_byindex" data-index="2">3</button>
+<button class="go_byindex" data-index="3">4</button>
+<button class="go_byindex" data-index="4">5</button>
+
+<script src="fox_play.js"></script>
+<script type="text/javascript">
+
+	var player_conf = {
+		cover: {url: 'http://fs146.www.ex.ua/show/103400/103400.jpg?1600'},
+		playlist: [
+			{ "title": "Тутси / Tootsie / Убойная комедия 80х / 8,1 / mp4", "type": "video", "src": "http://www.ex.ua/get/180306806" }, 
+			{ "title": "Track 2", "type": "audio", "src": "http://www.ex.ua/get/179997744" },
+			{ "title": "Musik 2", "type": "video", "src": "http://vjs.zencdn.net/v/oceans.mp4" },
+			{ "title": "Терминал 2", "type": "video", "src": "http://www.ex.ua/get/178966770" },
+			{ "title": "Терминал 3", "type": "video", "src": "http://www.ex.ua/get/178966809" }
+		]
+	};
+	
+	// --
+	
+	var p;
+	var c_bl = $('.fox_collapse_bl');
+
+	$('.go_byindex').click(function() {
+		if(typeof p === 'object') {
+			if(p.el()) {
+				p.byIndex($(this).data('index'));
+			} else {
+				p = initPlayer('fox_player', player_conf, $(this).data('index'));
+				p.on('collapse', function() {
+					c_bl.show();
+				});
+			}	
+		} else {
+			p = initPlayer('fox_player', player_conf, $(this).data('index'));
+
+			p.on('collapse', function(e) {
+				c_bl.find('span').text(this.pl.currentVideo.title);
+				c_bl.show();
+			});
+		}
+
+		p.trigger('open');	
+		c_bl.hide();
+	});
+
+	$('.fox_expand_player').on('click', function() {
+		c_bl.hide();
+		p.trigger('open');
+	});
+
+	$('.fox_close_player').on('click', function() {
+		c_bl.hide();
+		p.trigger('close');
+	});
+</script>
+
+</body>
+</html>
