@@ -5,17 +5,17 @@
   <meta http-equiv="X-UA-Compatible" content="IE=Edge"/>
   <meta charset="utf-8">
   <link rel="stylesheet" href="//ajax.googleapis.com/ajax/libs/jqueryui/1.11.1/themes/smoothness/jquery-ui.css" />
-  <link href="video-js.css" rel="stylesheet" type="text/css">
-  <link href="video-js-custom.css" rel="stylesheet" type="text/css">
-  <script type="text/javascript" src="/js/jquery.min.js"></script>
-  <script type="text/javascript" src="jquery-ui.min.js"></script>
+  <link href="css/video-js.css" rel="stylesheet" type="text/css">
+  <link href="css/video-js-custom.css" rel="stylesheet" type="text/css">
+  <script type="text/javascript" src="js/jquery.min.js"></script>
+  <script type="text/javascript" src="js/jquery-ui.min.js"></script>
 
   <style type="text/css">
   .go_byindex {width: 200px; height: 80px;}
   </style>
 
 
-  <script src="video.js"></script>
+  <script src="js/video.js"></script>
 </head>
 <body>
 
@@ -30,23 +30,19 @@
 	</div>
 </div>
 
-<button class="go_byindex" data-index="0">1</button>
-<button class="go_byindex" data-index="1">2</button>
-<button class="go_byindex" data-index="2">3</button>
-<button class="go_byindex" data-index="3">4</button>
-<button class="go_byindex" data-index="4">5</button>
+<button class="go_byindex" data-index="0">video</button>
+<button class="go_byindex" data-index="1">video</button>
+<button class="go_byindex" data-index="2">audio</button>
 
-<script src="fox_play.js"></script>
+<script src="js/fox_play.js"></script>
 <script type="text/javascript">
 
 	var player_conf = {
-		cover: {url: 'http://fs146.www.ex.ua/show/103400/103400.jpg?1600'},
+		cover: {url: 'http://i.ytimg.com/vi/J3r-ct0haZg/hqdefault.jpg'},
 		playlist: [
-			{ "title": "Тутси / Tootsie / Убойная комедия 80х / 8,1 / mp4", "type": "video", "src": "http://www.ex.ua/get/180306806" }, 
-			{ "title": "Track 2", "type": "audio", "src": "http://www.ex.ua/get/179997744" },
-			{ "title": "Musik 2", "type": "video", "src": "http://vjs.zencdn.net/v/oceans.mp4" },
-			{ "title": "Терминал 2", "type": "video", "src": "http://www.ex.ua/get/178966770" },
-			{ "title": "Терминал 3", "type": "video", "src": "http://www.ex.ua/get/178966809" }
+			{ "title": "jailhouse rock", "type": "video", "src": "data/jailhouse.mp4" }, 
+			{ "title": "Guns N' Roses - November Rain", "type": "video", "src": "data/november_rain.720.mp4" },
+			{ "title": "My", "type": "audio", "src": "data/my.mp3" }
 		]
 	};
 	
