@@ -148,10 +148,10 @@
 
 
 
-		$progressBar.on('mouseout', function() {
-			$tooltip.fadeOut();
-			// me.off('timeupdate', updateTipLine);
-		});
+		// $progressBar.on('mouseout', function() {
+		// 	$tooltip.fadeOut();
+		// 	// me.off('timeupdate', updateTipLine);
+		// });
 
 		// $progressBar.on('mouseenter', function() {
 		// 	me.on('timeupdate', updateTipLine);
@@ -174,7 +174,7 @@
 		// ---
 
 		$progressBar.on('mousemove', function(e) {
-			$tooltip.show();
+			// $tooltip.show();
 
 			updateTipLine(e);
 
@@ -294,6 +294,49 @@ function initPlayer(node, conf, startIndex) {
 				// setTimeout(me.volume.bind(me, 0.25), 1000);
 			}
 		});
+
+		// --
+
+		// var playObj = {
+		//     from: 'M11,10 L17,10 17,26 11,26 M20,10 L26,10 26,26 20,26', 
+		//     to: 'M11,10 L18,13.74 18,22.28 11,26 M18,13.74 L26,18 26,18 18,22.28',
+		//     dur: '0.2s',
+		//     keySplines: '.4 0 1 1',
+		//     repeatCount: 1
+		// };
+		
+		
+		// var pausObj = {
+		//     from: 'M11,10 L18,13.74 18,22.28 11,26 M18,13.74 L26,18 26,18 18,22.28', 
+		//     to: 'M11,10 L17,10 17,26 11,26 M20,10 L26,10 26,26 20,26',
+		//     dur: '0.2s',
+		//     keySplines: '.4 0 1 1',
+		//     repeatCount: 1
+		// };
+
+		// var $playBtn = $(me.controlBar.playToggle.el());
+
+		// var svgPlayString = '<svg width="100%" height="100%" viewBox="0 0 36 36" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">'
+  //   		    +'<defs>'
+  //   		        +'<path id="fox-play-svg" d="M 11 10 L 18 13.74 L 18 22.28 L 11 26 M 18 13.74 L 26 18 L 26 18 L 18 22.28">'        
+  //   		            +'<animate attributeType="XML" attributeName="d" fill="freeze"></animate>'      
+  //   		        +'</path>'
+  //   		    +'</defs>' 
+  //   		    +'<use xlink:href="#fox-play-svg" class="fox-svg-shadow"></use>'
+  //   		    +'<use xlink:href="#fox-play-svg" class="fox-svg-fill"></use>'
+  //   		'</svg>';
+
+  //   	$playBtn.append(svgPlayString);
+    	
+  //   	var svgAnim = $playBtn.find('svg animate');
+
+		// me.on('play', function() {
+		// 	svgAnim.attr(pausObj).get(0).beginElement();
+		// });
+
+		// me.on('pause', function() {
+		// 	svgAnim.attr(playObj).get(0).beginElement();
+		// });
 
 		// ---
 

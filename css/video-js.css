@@ -209,6 +209,7 @@ fonts to show/hide properly.
 .vjs-default-skin .vjs-play-control {
   width: 5em;
   cursor: pointer;
+  /*top: -2px;*/
 }
 .vjs-default-skin .vjs-play-control:before {
   content: "\e600";
