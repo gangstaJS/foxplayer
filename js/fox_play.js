@@ -1,3 +1,7 @@
+/**
+	OZ@EX.UA
+*/
+
 (function(vjs) {
   'use strict';
 
