@@ -71,8 +71,6 @@
         player.$title.text(player.pl.currentVideo.title);
         
         if(player.pl.currentVideo.type == "audio") {
-        	// player.pl.showPoster();
-
         	setTimeout(player.pl.showPoster.bind(this), 300);
         } else {
         	player.pl.hidePoster();
@@ -106,7 +104,7 @@
   // -- public methods;
 
   vjs.Player.prototype.next = function(){
-    //alert('next');
+    // alert('next');
     this.pl._nextPrev('next');
     return this;
   };
@@ -345,7 +343,7 @@ function initPlayer(node, conf, startIndex) {
 
 			me.controlBar.progressControl.on('touchmove', function(e) {
 				if(down) {
-					console.log(this.seekBar.update());
+					this.seekBar.update();
 				}
 			});
 		} else {
@@ -355,12 +353,27 @@ function initPlayer(node, conf, startIndex) {
 	
 			me.controlBar.progressControl.on('mousemove', function(e) {
 				if(down) {
-					console.log(this.seekBar.update());
+					this.seekBar.update();
 				}
 			});
 		}
 
-	});	
+		// --
+
+		var adsOptions = {
+			'pre': [
+				{url: 'http://ads.adfox.ru/175105/getCode?p1=bsyyj&p2=emxn&pfc=a&pfb=a&plp=a&pli=a&pop=a&puid1=&puid2=&puid3=&puid22=&puid25=&puid27=&puid31=&puid33=&puid51=&puid52='},
+				{url: 'http://ads.adfox.ru/175105/getCode?p1=bsyyk&p2=emxn&pfc=a&pfb=a&plp=a&pli=a&pop=a&puid1=&puid2=&puid3=&puid22=&puid25=&puid27=&puid31=&puid33=&puid51=&puid52='}
+			],
+
+			debug: true
+		};
+
+		// me.ads(adsOptions);
+		me.adsPrepareData(adsOptions);
+
+
+	});	// end player ready
 
 	var $player = $(playerInstance.el()).show();	
 	$player.find('video').show();
@@ -397,7 +410,7 @@ function initPlayer(node, conf, startIndex) {
 		}, false);
 	
 		playerInstance.on('ended', function() {
-			if(conf.playlist.length > 1) {
+			if((conf.playlist.length > 1) && (this.ads.state != 'content-playback')) {
 				this.next();
 			}
 		});

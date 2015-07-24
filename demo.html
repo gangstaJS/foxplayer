@@ -16,6 +16,11 @@
 
 
   <script src="js/video.js"></script>
+
+  <link rel="stylesheet" href="css/videojs.ads.css">
+  <script src="js/videojs.ads.js"></script>
+  <script src="js/vjs-prepare-data.js"></script>
+
 </head>
 <body>
 
@@ -40,9 +45,9 @@
 	var player_conf = {
 		cover: {url: 'http://i.ytimg.com/vi/J3r-ct0haZg/hqdefault.jpg'},
 		playlist: [
-			{ "title": "jailhouse rock", "type": "video", "src": "data/jailhouse.mp4" }, 
+			{ "title": "jailhouse rock", "type": "video", "src": "data/jailhouse.mp4", "ads": "true"}, 
 			// { "title": "Guns N' Roses - November Rain", "type": "video", "src": "data/november_rain.720.mp4" },
-			{ "title": "My", "type": "audio", "src": "data/my.mp3" }
+			{ "title": "My", "type": "audio", "src": "data/my.mp3", "ads": "true"}
 		]
 	};
 	
