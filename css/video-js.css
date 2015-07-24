@@ -209,14 +209,14 @@ fonts to show/hide properly.
 .vjs-default-skin .vjs-play-control {
   width: 5em;
   cursor: pointer;
-  /*top: -2px;*/
+  top: -2px;
 }
-.vjs-default-skin .vjs-play-control:before {
+/*.vjs-default-skin .vjs-play-control:before {
   content: "\e600";
 }
 .vjs-default-skin.vjs-playing .vjs-play-control:before {
   content: "\e602";
-}
+}*/
 
 .vjs-default-skin .vjs-play-control:hover:before {
   color: #ffbf2c;

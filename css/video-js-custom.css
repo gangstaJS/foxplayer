@@ -353,7 +353,7 @@ filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#40000000', e
 
 /**/
 
-/*.fox-svg-fill {
+#fox-play-svg {
   fill: #fff;
   -webkit-transition:  all 325ms ease;
 	-moz-transition: all    325ms ease;
@@ -362,6 +362,6 @@ filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#40000000', e
 	transition:      all         325ms ease;
 }
 
-.vjs-default-skin .vjs-play-control:hover .fox-svg-fill {
+.vjs-default-skin .vjs-play-control:hover #fox-play-svg {
     fill: #ffbf2c;
-}*/
+}
