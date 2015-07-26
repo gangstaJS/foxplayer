@@ -3,7 +3,7 @@
 
 	var state = {}, settings = {}, player, predictionCount = 5;
 
-	function adsPrepareData(options) {
+	function adsPreRolls(options) {
 		player = this;
 		settings = options;
 
@@ -11,7 +11,7 @@
 
 		player.on('adstart', function() {
 			$(this.el()).addClass('vjs-sda');
-			// setTimeout(player.pl.hidePoster.bind(this), 100);
+			player.pl.hidePoster();
 			tryPrepareNextVast();
     	});
 
@@ -146,7 +146,7 @@
 
 
 
-	vjs.plugin('adsPrepareData', adsPrepareData);
+	vjs.plugin('adsPreRolls', adsPreRolls);
 
 
 }(window, document, videojs);

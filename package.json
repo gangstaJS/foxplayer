@@ -1,0 +1,12 @@
+{
+  "name": "foxplayer",
+  "version": "0.0.1",
+  "private" : "true",
+  "devDependencies": {
+    "gulp": "latest",
+    "gulp-concat": "latest",
+    "gulp-sourcemaps": "latest",
+    "gulp-uglify": "latest",
+    "gulp-rename": "latest"
+  }
+}
