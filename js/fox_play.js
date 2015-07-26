@@ -8,6 +8,10 @@ function initPlayer(node, conf, startIndex) {
 
 	videojs.options.flash.swf = "video-js.swf";
 
+	var shouldShowAds = true;
+	var lastTime = (new Date()).getTime();
+	var periodAds = 300; // 300s == 5m	
+
 	if(typeof node === 'string') {
 		node = $('#'+node);
 	} else {
@@ -150,7 +154,9 @@ function initPlayer(node, conf, startIndex) {
 				{url: 'http://ads.adfox.ru/175105/getCode?p1=bsyyk&p2=emxn&pfc=a&pfb=a&plp=a&pli=a&pop=a&puid1=&puid2=&puid3=&puid22=&puid25=&puid27=&puid31=&puid33=&puid51=&puid52='}
 			],
 
-			debug: true
+			debug: true,
+			timeout: 5000,
+			// prerollTimeout: 1000
 		};
 
 		// me.ads(adsOptions);
@@ -196,6 +202,7 @@ function initPlayer(node, conf, startIndex) {
 		playerInstance.on('ended', function() {
 			if((conf.playlist.length > 1) && (this.ads.state != 'content-playback')) {
 				this.next();
+				console.info('next media start');
 			}
 		});
 

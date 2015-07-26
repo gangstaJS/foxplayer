@@ -157,6 +157,8 @@ var
         type: player.currentType()
       };
 
+      console.log('player.currentSrc()', player.currentSrc());
+
     if (tech) {
       snapshot.nativePoster = tech.poster;
       snapshot.style = tech.getAttribute('style');
