@@ -15,17 +15,17 @@
 	function adsPreRolls(options) {
 		player = this;
 		settings = options;
-		$player = $(this.el());
+		$player = $(player.el());
 
 		player.vastEventsTracking();
 		player.ads(settings);
 
 
 		player.on('adstart', function() {
-			snap = this.ads.snapshot;
+      console.info('START ADS');
 			// setTimeout(player.pl.hidePoster.bind(this), 200);
 			tryPrepareNextVast();
-    	});
+    });
 
     	// player.on('adend', function() {
     	// });  
@@ -70,7 +70,7 @@
         	}
     	});	
 
-	};
+	}
 
 	function tryPrepareNextVast() {
 		if(settings.pre.length && predictionCount) {
@@ -175,7 +175,7 @@
 
         // tell videojs to load the ad
         // player.src(state.adsMedia);
-        player.pl._setVideoSource(state.adsMedia);
+        setTimeout(player.pl._setVideoSource.bind(player, state.adsMedia), 100);
         initAdsControls();
 
         // when it's finished

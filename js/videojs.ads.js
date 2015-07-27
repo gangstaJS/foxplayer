@@ -566,6 +566,7 @@ var
           },
           'ad-playback': {
             enter: function() {
+              console.info('ENTER', player.currentSrc());
               // capture current player state snapshot (playing, currentTime, src)
               this.snapshot = getPlayerSnapshot(player);
 
