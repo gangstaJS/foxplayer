@@ -1,16 +1,27 @@
 /**
 	OZ@EX.UA
 */
+var periodAds = 30; // 300s == 5m	
 
+// --
+
+setInterval(function() {
+	lastAds = (getCookie('lastAds') || 0);
+	var diff = (Math.floor((new Date()).getTime()/1000) - lastAds);
+
+	var can = 0;
+
+	if(diff <= periodAds) {
+		can = periodAds-diff;
+	}
+
+	$('#time_log').text("Следующий показ рекламы возможен через: "+ can + ' сек');
+}, 500);
 
 function initPlayer(node, conf, startIndex) {
 	'use strict';
 
 	videojs.options.flash.swf = "video-js.swf";
-
-	var shouldShowAds = true;
-	var lastTime = (new Date()).getTime();
-	var periodAds = 300; // 300s == 5m	
 
 	if(typeof node === 'string') {
 		node = $('#'+node);
@@ -86,7 +97,7 @@ function initPlayer(node, conf, startIndex) {
 		var playObj = {
 		    from: 'M11,10 L17,10 17,26 11,26 M20,10 L26,10 26,26 20,26', 
 		    to: 'M11,10 L18,13.74 18,22.28 11,26 M18,13.74 L26,18 26,18 18,22.28',
-		    dur: '0.2s',
+		    dur: '0.1s',
 		    keySplines: '.4 0 1 1',
 		    repeatCount: 1
 		};
@@ -95,7 +106,7 @@ function initPlayer(node, conf, startIndex) {
 		var pausObj = {
 		    from: 'M11,10 L18,13.74 18,22.28 11,26 M18,13.74 L26,18 26,18 18,22.28', 
 		    to: 'M11,10 L17,10 17,26 11,26 M20,10 L26,10 26,26 20,26',
-		    dur: '0.2s',
+		    dur: '0.1s',
 		    keySplines: '.4 0 1 1',
 		    repeatCount: 1
 		};
@@ -154,9 +165,9 @@ function initPlayer(node, conf, startIndex) {
 				{url: 'http://ads.adfox.ru/175105/getCode?p1=bsyyk&p2=emxn&pfc=a&pfb=a&plp=a&pli=a&pop=a&puid1=&puid2=&puid3=&puid22=&puid25=&puid27=&puid31=&puid33=&puid51=&puid52='}
 			],
 
-			debug: true,
-			timeout: 5000,
-			// prerollTimeout: 1000
+			debug: false,
+			timeout: 1000,
+			prerollTimeout: 1000
 		};
 
 		// me.ads(adsOptions);
@@ -200,7 +211,8 @@ function initPlayer(node, conf, startIndex) {
 		}, false);
 	
 		playerInstance.on('ended', function() {
-			if((conf.playlist.length > 1) && (this.ads.state != 'content-playback')) {
+			console.info('%c'+this.ads.state, 'color: #000; background-color: yellow; font-size: 18px');
+			if((conf.playlist.length > 1) && (this.ads.state == 'postroll?')) {
 				this.next();
 				console.info('next media start');
 			}
@@ -210,3 +222,37 @@ function initPlayer(node, conf, startIndex) {
 
 	return playerInstance;
 };
+
+// ---
+
+function createCookie(name, value, days) {
+	var expires = "";
+	if(days) {
+		var date = new Date();
+		date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
+		expires = "; expires=" + date.toGMTString();
+	}
+
+	var host = window.location.host;
+
+	if(/(:\d+)/.test(window.location.host)) {
+		host = window.location.host.split(':')[0];
+	}
+	
+	document.cookie = name + "=" + value + expires + ";domain=."+ host +";path=/";
+}
+
+function getCookie(c_name) {
+	if(document.cookie.length > 0) {
+		c_start = document.cookie.indexOf(c_name + "=");
+		if(c_start != -1) {
+			c_start = c_start + c_name.length + 1;
+			c_end = document.cookie.indexOf(";", c_start);
+			if(c_end == -1) {
+				c_end = document.cookie.length;
+			}
+			return unescape(document.cookie.substring(c_start, c_end));
+		}
+	}
+	return "";
+}

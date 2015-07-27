@@ -157,7 +157,7 @@ var
         type: player.currentType()
       };
 
-      console.log('player.currentSrc()', player.currentSrc());
+      // console.log('player.currentSrc()', player.currentSrc());
 
     if (tech) {
       snapshot.nativePoster = tech.poster;
@@ -363,7 +363,7 @@ var
 
     // maximum amount of time in ms to wait for the ad implementation to start
     // linear ad mode after `contentended` has fired.
-    postrollTimeout: 100,
+    postrollTimeout: 0,
 
     // when truthy, instructs the plugin to output additional information about
     // plugin state to the video.js log. On most devices, the video.js log is
@@ -566,7 +566,7 @@ var
           },
           'ad-playback': {
             enter: function() {
-              console.info('ENTER', player.currentSrc());
+              // console.info('ENTER', player.currentSrc());
               // capture current player state snapshot (playing, currentTime, src)
               this.snapshot = getPlayerSnapshot(player);
 

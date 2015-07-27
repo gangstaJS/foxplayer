@@ -510,7 +510,7 @@ easily in the skin designer. http://designer.videojs.com/
   transition: all 0.4s;
 }
 /* Optionally center */
-.vjs-default-skin.vjs-big-play-centered .vjs-big-play-button {
+.vjs-default-skin/*.vjs-big-play-centered*/ .vjs-big-play-button {
   /* Center it horizontally */
   left: 50%;
   margin-left: -2.1em;

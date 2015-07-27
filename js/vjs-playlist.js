@@ -63,14 +63,14 @@
         player.pl.currentVideo = player.pl.items[index];
     
         // if (!player.paused()){
-        player.pl._resumeVideo();
+          player.pl._resumeVideo();
         // }
 
         // proc.startProccess(player.pl.currentVideo);
         player.$title.text(player.pl.currentVideo.title);
         
         if(player.pl.currentVideo.type == "audio") {
-        	setTimeout(player.pl.showPoster.bind(this), 300);
+        	setTimeout(player.pl.showPoster.bind(this), 400);
         } else {
         	player.pl.hidePoster();
         }
@@ -118,6 +118,7 @@
   };
   
   vjs.Player.prototype.byIndex = function(index){
+    this.trigger('setByIndex');
     this.pl._setVideo(index);
     return this;
   };

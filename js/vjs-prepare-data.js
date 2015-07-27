@@ -1,3 +1,5 @@
+var snapshotPrerolls = [];
+
 !function(window, document, vjs, undefined) {
 	"use strict";
 
@@ -6,7 +8,7 @@
 		player, 
 		predictionCount = 5, 
 		$player,
-		snap,
+		$videoEl,
 	
 		// ads controls	
 		$skipBtn;
@@ -16,16 +18,25 @@
 		player = this;
 		settings = options;
 		$player = $(player.el());
+		$videoEl = $('#'+player.id());
 
 		player.vastEventsTracking();
 		player.ads(settings);
 
+		snapshotPrerolls = settings.pre.slice();
+
+		// player.on('play', function() { 
+		// 	if(this.currentTime() <= 3) {
+		// 		requestAds()
+		// 	}
+			
+		// });
 
 		player.on('adstart', function() {
-      console.info('START ADS');
+      		console.info('START ADS');
 			// setTimeout(player.pl.hidePoster.bind(this), 200);
 			tryPrepareNextVast();
-    });
+    	});
 
     	// player.on('adend', function() {
     	// });  
@@ -36,22 +47,27 @@
     	//   requestAds();
     	// }	
 
+    	// player.on('contentupdate', function() { alert(1); });
 
-    	player.on('readyforpreroll', function() {  		
+
+    	player.on('readyforpreroll', function() { 		
     		if (!state.prerollPlayed) {
         		state.prerollPlayed = true;
        			playAd();
       		}
     	});	
 
-
     	player.on('adsnextroll', function() {			
     		requestAds();
     	});	
 
+    	player.on('setByIndex', function() {			
+    		destructAdsControls();
+    	});	
+
     	// --
 
-		player.on('adscanceled', function() {				
+		player.on('adcanceled', function() {				
     		player.ads.endLinearAdMode();
         	player.adsvast.endTrecking();
 
@@ -60,13 +76,12 @@
         	state.prerollPlayed = false;
         	destructAdsControls();
 
-        	console.log('settings.pre', settings.pre.length);
-
         	if(settings.pre.length) {
         		player.trigger('adsnextroll');
         	} else {
+        		createCookie('lastAds', getUnix());
+          		settings.pre = snapshotPrerolls.slice();;
         		this.play();
-        		player.off('contentupdate', requestAds);
         	}
     	});	
 
@@ -87,7 +102,8 @@
 					} else {
 						state.hasNextVast = true;
 						state.nextVast = media;
-						console.log('hes next vast', state.nextVast);
+						// console.log('hes next vast', state.nextVast);
+						predictionCount = 5;
 					}
 				}
 			});
@@ -97,26 +113,27 @@
 	// --
 
 	function requestAds() {
-		if(settings.pre.length) {
+		var shouldShowAds = false,
+			lastAds = (getCookie('lastAds') || 0);
+
+		if((getUnix() - lastAds) >= periodAds) { shouldShowAds = true; }
+
+		console.log(settings.pre.length, shouldShowAds)
+
+		if(settings.pre.length && shouldShowAds) {
+			console.log('requestAds');
 			var deferred;
 
 			if(state.hasNextVast) { 
+				console.log('hasNextVast');
 				settings.pre = [];
 				state.adsMedia = state.nextVast;
-				predictionCount = 5;
-				// setTimeout(player.trigger.bind(player, 'adsready'), 1000);
-				// player.trigger('adsready');
-				// adsReadyInt = setInterval(function() {
-				// 	console.log(" player.trigger('adsready');", player.ads.state);
-				// 	player.trigger('adsready');
-					
-				// }, 50);
+				state.hasNextVast = false;
 				player.one('playing', function() {
-					// console.log(snap);
 					player.trigger('adsready');
-
-					// setTimeout(player.trigger.bind(player, 'adsready'), 5000);
 				});
+				// player.trigger('adsready');
+				setTimeout(player.trigger.bind(player, 'adsready'), 200);
 			} else {
 				state.curAdInitData = settings.pre.shift();
 				deferred = vastRequest(state.curAdInitData.url);
@@ -127,35 +144,14 @@
 				});
 			}
 
-			console.log('state.adsMedia', state.adsMedia);
+			// console.log('state.adsMedia', state.adsMedia);
 			
 		} else {
 			// player.trigger('adscanceled');
-			console.warn('Preroll is empty');
+
+			console.warn('Preroll is empty', settings.pre.length);
 		}
 	}
-
-	// --
-
-	function vastRequest(vastURL) {
-		return $.ajax({url: vastURL, dataType: 'xml'});
-	};
-
-	// --
-
-	function parseVast(xml) {
-		var $vast = $(xml);
-		var $mediaFiles = $vast.find('MediaFiles MediaFile');
-		if($mediaFiles.length) {
-			return {
-				type: $mediaFiles.eq(0).attr('type'), 
-				src: $mediaFiles.eq(0).text(),
-				skipButton: parseInt($vast.find('Extensions Extension[type=skipButton]').text()),
-				skipTime: $vast.find('Extensions Extension[type=skipTime]').text(),
-			};
-		}
-		return undefined;		
-	};
 
 	// --
 
@@ -169,13 +165,14 @@
         // tell ads plugin we're ready to play our ad
         player.ads.startLinearAdMode();
 
-        player.adsvast.startTrecking();
+        player.adsvast.startTrecking(state.adsMedia.vastStats);
 
         state.adPlaying = true;
 
         // tell videojs to load the ad
         // player.src(state.adsMedia);
         setTimeout(player.pl._setVideoSource.bind(player, state.adsMedia), 100);
+        // player.pl._setVideoSource(state.adsMedia);
         initAdsControls();
 
         // when it's finished
@@ -190,17 +187,58 @@
           state.prerollPlayed = false;
           destructAdsControls();
 
-          console.log('settings.pre', settings.pre.length);
-
           if(settings.pre.length) {
+          	console.info('adsnextroll');
           	player.trigger('adsnextroll');
           } else {
+          	createCookie('lastAds', getUnix());
+          	settings.pre = snapshotPrerolls.slice();
           	this.play();
-          	player.off('contentupdate', requestAds);
           }
         });
 
       };
+
+	// --
+
+	function vastRequest(vastURL) {
+		return $.ajax({url: vastURL, dataType: 'xml'});
+	};
+
+	// --
+
+	function parseVast(xml) {
+		var $vast = $(xml);
+		var $mediaFiles = $vast.find('MediaFiles MediaFile');
+
+		if($mediaFiles.length) {
+			return {
+				vastStats: (getVastEvents($vast) || {}),
+				type: $mediaFiles.eq(0).attr('type'), 
+				src: $mediaFiles.eq(0).text(),
+				skipButton: parseInt($vast.find('Extensions Extension[type=skipButton]').text()),
+				skipTime: $vast.find('Extensions Extension[type=skipTime]').text(),
+			};
+		}
+		return undefined;		
+	};
+
+	// --
+
+	function getVastEvents(vast) {
+		return {
+			skipAd: vast.find('Extensions Extension[type=skipAd]').text(),
+			addClick: vast.find('Extensions Extension[type=addClick]').text(),
+			linkTxt:  vast.find('Extensions Extension[type=linkTxt]').text(),
+			videoClicks: vast.find('VideoClicks ClickThrough').text()
+		}
+	}
+
+	// --
+
+	// setInterval(function() {
+	// 	console.log(player.ads.state);
+	// }, 100);
 
 
       function initAdsControls() {
@@ -211,6 +249,7 @@
       	if(state.adsMedia.skipButton) { // проверяем разрешен ли скип рекламы.
       		if(state.adsMedia.skipTime <= 0) { // показать скип кнопку сразу
       			$skipBtn.show();
+      			player.one('adplay', checkSkip);
       		} else {
       			player.on('timeupdate', checkSkip);
       		}
@@ -223,12 +262,16 @@
       	}
 
       	// ---
+
+      	$videoEl.on('click', clickThrough);
       }
 
       // --
 
       function destructAdsControls() {
       	$skipBtn.remove();
+      	player.off('timeupdate', checkSkip);
+      	$videoEl.off('click', clickThrough);
       }
 
 
@@ -245,8 +288,12 @@
       	$skipBtn.remove();
       	player.off('timeupdate', checkSkip);
       	player.trigger('adskiped');
-      	player.trigger('adscanceled');
+      	player.trigger('adcanceled');
       	
+      }
+
+      function clickThrough() {
+      	player.trigger('clickThrough');
       }
 
       // --
@@ -269,6 +316,10 @@
       	}
 
       	return seconds;
+      }
+
+      function getUnix() {
+      	return Math.floor((new Date()).getTime()/1000);
       }
 
 

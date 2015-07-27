@@ -1,13 +1,13 @@
 !function(window, document, vjs, undefined) {
 	"use strict";
 
-	var settings, player;
+	var settings, player, eventStat = {};
 
 	
 
-	// var sendEvent = function(url) {
-	// 	$.ajax({url:url, type:'get', dataType:'text'});
-	// }
+	var sendEvent = function(url) {
+		$.ajax({url:url, type:'get', dataType:'text'});
+	}
 
 	// --
 
@@ -19,17 +19,27 @@
 	
 
 		player.adsvast.startTrecking = function(events) {
+			eventStat = events;
+			// console.info('eventStat', eventStat);
 			player.on('adskiped', player.adsvast.skiped);
+
+			player.on('clickThrough', player.adsvast.clickThrough);
 		}
 	
 		player.adsvast.endTrecking = function() {
 			player.off('adskiped', player.adsvast.skiped);
+			eventStat = {};
 		}
 
 		// --
 
 		player.adsvast.skiped = function() {
-			console.info('%cSkip send', 'color: #000; background-color: yellow; font-size: 18px');
+			sendEvent(eventStat.skipAd);
+		};
+
+		player.adsvast.clickThrough = function() {
+			window.open(eventStat.videoClicks);
+			sendEvent(eventStat.addClick);
 		};
 
 	};

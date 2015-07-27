@@ -376,8 +376,7 @@ filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#40000000', e
 /* ads */
 .vjs-ad-playing .vjs-poster,
 .vjs-ad-playing .vjs-pn-control,
-.vjs-ad-playing .vjs-fullscreen-control,
-.vjs-ad-playing .vjs-volume-control {
+.vjs-ad-playing .vjs-fullscreen-control {
 	display: none !important;
 }
 
@@ -395,3 +394,9 @@ filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#40000000', e
 	right: 0; bottom: 100px;
 	cursor: pointer;
 }
+
+/*.vjs-ad-playing .vjs-control-bar {
+	display: block !important;
+	visibility: visible !important;
+	opacity: 1 !important;
+}*/
