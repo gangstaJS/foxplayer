@@ -1,2 +1,181 @@
-/* videojs-hotkeys v0.2.5 - https://github.com/ctd1500/videojs-hotkeys */
-!function(a,b){"use strict";a.videojs_hotkeys={version:"0.2.5"};var c=function(a){var b=this,c={volumeStep:.1,seekStep:5,enableMute:!0,enableFullscreen:!0,enableNumbers:!0};a=a||{};var d=a.volumeStep||c.volumeStep,e=a.seekStep||c.seekStep,f=a.enableMute||c.enableMute,g=a.enableFullscreen||c.enableFullscreen,h=a.enableNumbers||c.enableNumbers;b.el().hasAttribute("tabIndex")||b.el().setAttribute("tabIndex","-1"),b.on("play",function(){var a=b.el().querySelector(".iframeblocker");a&&""==a.style.display&&(a.style.display="block",a.style.bottom="39px")});var i=function(a){var c=a.which;if(b.controls()){var i=document.activeElement;if(i==b.el()||i==b.el().querySelector(".vjs-tech")||i==b.el().querySelector(".vjs-control-bar")||i==b.el().querySelector(".iframeblocker"))switch(c){case 32:a.preventDefault(),b.paused()?b.play():b.pause();break;case 37:a.preventDefault();var j=b.currentTime()-e;b.currentTime()<=e&&(j=0),b.currentTime(j);break;case 39:a.preventDefault(),b.currentTime(b.currentTime()+e);break;case 40:a.preventDefault(),b.volume(b.volume()-d);break;case 38:a.preventDefault(),b.volume(b.volume()+d);break;case 77:f&&b.muted(b.muted()?!1:!0);break;case 70:g&&(b.isFullscreen()?b.exitFullscreen():b.requestFullscreen());break;default:if((c>47&&59>c||c>95&&106>c)&&h){var k=48;c>95&&(k=96);var l=c-k;a.preventDefault(),b.currentTime(b.duration()*l*.1)}}}},j=function(a){if(b.controls()){var c=a.relatedTarget||a.toElement||document.activeElement;(c==b.el()||c==b.el().querySelector(".vjs-tech")||c==b.el().querySelector(".iframeblocker"))&&g&&(b.isFullscreen()?b.exitFullscreen():b.requestFullscreen())}};return b.on("keydown",i),b.on("dblclick",j),this};b.plugin("hotkeys",c)}(window,window.videojs);
+/*
+ * Video.js Hotkeys
+ * https://github.com/ctd1500/videojs-hotkeys
+ *
+ * Copyright (c) 2015 Chris Dougherty
+ * Licensed under the Apache-2.0 license.
+ */
+
+(function(window, videojs) {
+  'use strict';
+
+  window['videojs_hotkeys'] = { version: "0.2.5" };
+  var hotkeys = function(options) {
+    var player = this;
+    var def_options = {
+      volumeStep: 0.1,
+      seekStep: 5,
+      enableMute: true,
+      enableFullscreen: true,
+      enableNumbers: true,
+      enableJogStyle: false
+    };
+    options = options || {};
+    var volumeStep = options.volumeStep || def_options.volumeStep;
+    var seekStep = options.seekStep || def_options.seekStep;
+    var enableMute = options.enableMute || def_options.enableMute;
+    var enableFull = options.enableFullscreen || def_options.enableFullscreen;
+    var enableNumbers = options.enableNumbers || def_options.enableNumbers;
+    var enableJogStyle = options.enableJogStyle || def_options.enableJogStyle;
+
+    // Set default player tabindex to handle keydown and doubleclick events
+    if (!player.el().hasAttribute('tabIndex')) {
+      player.el().setAttribute('tabIndex', '-1');
+    }
+
+    player.on('play', function() {
+      // Fix allowing the YouTube plugin to have hotkey support.
+
+      var ifblocker = player.el().querySelector('.iframeblocker');
+      if (ifblocker &&
+          ifblocker.style.display == "") {
+        ifblocker.style.display = "block";
+        ifblocker.style.bottom = "39px";
+      }
+    });
+
+    var keyDown = function keyDown(event) {
+
+      var ewhich = event.which, curTime;
+      // When controls are disabled, hotkeys will be disabled as well
+      if (player.controls()) {
+
+        // Don't catch keys if any control buttons are focused, unless in jogStyle mode
+        var activeEl = document.activeElement;
+        if (activeEl == player.el() ||
+            activeEl == player.el().querySelector('.vjs-tech') ||
+            activeEl == player.el().querySelector('.vjs-control-bar') ||
+            activeEl == player.el().querySelector('.iframeblocker')) {
+
+          switch (ewhich) {
+
+            // Spacebar toggles play/pause
+            case 32:
+              event.preventDefault();
+              player.trigger( player.paused() ? 'AdResume' : 'AdPause' );
+              if (player.paused()) {
+                player.play();
+              } else {
+                player.pause();
+              }
+              break;
+
+            // Seeking with the left/right arrow keys
+            case 37: // Left Arrow
+              event.preventDefault();
+              curTime = player.currentTime() - seekStep;
+              // The flash player tech will allow you to seek into negative
+              // numbers and break the seekbar, so try to prevent that.
+              if (player.currentTime() <= seekStep) {
+                curTime = 0;
+              }
+              player.currentTime(curTime);
+              break;
+            case 39: // Right Arrow
+              event.preventDefault();
+              player.currentTime(player.currentTime() + seekStep);
+              break;
+
+            // Volume control with the up/down arrow keys
+            case 40: // Down Arrow
+              event.preventDefault();
+              if (!enableJogStyle) {
+                player.volume(player.volume() - volumeStep);
+              } else {
+                curTime = player.currentTime() - 1;
+                if (player.currentTime() <= 1) {
+                  curTime = 0;
+                }
+                player.currentTime(curTime);
+              }
+              break;
+            case 38: // Up Arrow
+              event.preventDefault();
+              if (!enableJogStyle) {
+                player.volume(player.volume() + volumeStep);
+              } else {
+                player.currentTime(player.currentTime() + 1);
+              }
+              break;
+
+            // Toggle Mute with the M key
+            case 77:
+              if (enableMute) {
+                if (player.muted()) {
+                  player.muted(false);
+                } else {
+                  player.muted(true);
+                }
+              }
+              break;
+
+            // Toggle Fullscreen with the F key
+            case  70:
+              if (enableFull) {
+                if (player.isFullscreen()) {
+                  player.exitFullscreen();
+                } else {
+                  player.requestFullscreen();
+                }
+              }
+              break;
+
+            default:
+              // Number keys from 0-9 skip to a percentage of the video. 0 is 0% and 9 is 90%
+              if ((ewhich > 47 && ewhich < 59) || (ewhich > 95 && ewhich < 106)) {
+                if (enableNumbers) {
+                  var sub = 48;
+                  if (ewhich > 95) {
+                    sub = 96;
+                  }
+                  var number = ewhich - sub;
+                  event.preventDefault();
+                  player.currentTime(player.duration() * number * 0.1);
+                }
+              }
+          }
+        }
+      }
+    };
+
+    var doubleClick = function doubleClick(event) {
+
+      // When controls are disabled, hotkeys will be disabled as well
+      if (player.controls()) {
+
+        // Don't catch clicks if any control buttons are focused
+        var activeEl = event.relatedTarget || event.toElement || document.activeElement;
+        if (activeEl == player.el() ||
+            activeEl == player.el().querySelector('.vjs-tech') ||
+            activeEl == player.el().querySelector('.iframeblocker')) {
+
+          if (enableFull) {
+            if (player.isFullscreen()) {
+              player.exitFullscreen();
+            } else {
+              player.requestFullscreen();
+            }
+          }
+        }
+      }
+    };
+
+    player.on('keydown', keyDown);
+    player.on('dblclick', doubleClick);
+
+    return this;
+  };
+
+  videojs.plugin('hotkeys', hotkeys);
+
+})(window, window.videojs);

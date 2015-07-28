@@ -16,30 +16,111 @@
 	function vastEventsTracking() {
 		player = this;
 		player.adsvast = player.adsvast || {};
+
+		var AdEvents = [
+			'Skiped',
+			'ClickThrough',
+			'Impression',
+			'CreativeView',
+			'Start',
+			'Unmute',
+			'Mute',
+			'Complete',
+			'Pause',
+			'Resume',
+			'FirstQuartile',
+			'Midpoint',
+			'ThirdQuartile'
+		];
+
+		var style = 'font-size:20px; color: green;';
 	
 
 		player.adsvast.startTrecking = function(events) {
 			eventStat = events;
-			// console.info('eventStat', eventStat);
-			player.on('adskiped', player.adsvast.skiped);
 
-			player.on('clickThrough', player.adsvast.clickThrough);
+			for(var j = 0, l = AdEvents.length; j<l; j++) {
+				var eve = 'Ad' + AdEvents[j];
+				player.on(eve, player.adsvast[eve]);
+			}
 		}
 	
 		player.adsvast.endTrecking = function() {
-			player.off('adskiped', player.adsvast.skiped);
+
+			for(var j = 0, l = AdEvents.length; j<l; j++) {
+				var eve = 'Ad' + AdEvents[j];
+				player.off(eve, player.adsvast[eve]);
+			}
+
 			eventStat = {};
 		}
 
 		// --
 
-		player.adsvast.skiped = function() {
-			sendEvent(eventStat.skipAd);
+		player.adsvast.AdSkiped = function() {
+			sendEvent(eventStat.vastExtensions.skipAd);
+			console.log('%c AdSkiped', style);
 		};
 
-		player.adsvast.clickThrough = function() {
-			window.open(eventStat.videoClicks);
+		player.adsvast.AdClickThrough = function() {
+			window.open(eventStat.vastClickThrough);
 			sendEvent(eventStat.addClick);
+			console.log('%c AdClickThrough', style);
+		};
+
+		player.adsvast.AdImpression = function() {
+			sendEvent(eventStat.vastImpression);
+			console.log('%c AdImpression', style);
+		};
+
+		player.adsvast.AdCreativeView = function() {
+			sendEvent(eventStat.vastEvents.creativeView);
+			console.log('%c AdCreativeView', style);
+		};
+
+		player.adsvast.AdStart = function() {
+			sendEvent(eventStat.vastEvents.start);
+			console.log('%c AdStart', style);
+		};
+
+		player.adsvast.AdUnmute = function() {
+			sendEvent(eventStat.vastEvents.unmute);
+			console.log('%c AdUnmute', style);
+		};
+
+		player.adsvast.AdMute = function() {
+			sendEvent(eventStat.vastEvents.mute);
+			console.log('%c AdMute', style);
+		};
+
+		player.adsvast.AdComplete = function() {
+			sendEvent(eventStat.vastEvents.complete);
+			console.log('%c AdComplete', style);
+		};
+
+		player.adsvast.AdPause = function() {
+			sendEvent(eventStat.vastEvents.pause);
+			console.log('%c AdPause', style);
+		};
+
+		player.adsvast.AdResume = function() {
+			sendEvent(eventStat.vastEvents.resume);
+			console.log('%c AdResume', style);
+		};
+
+		player.adsvast.AdFirstQuartile = function() {
+			sendEvent(eventStat.vastEvents.firstQuartile);
+			console.log('%c AdFirstQuartile', style);
+		};
+
+		player.adsvast.AdMidpoint = function() {
+			sendEvent(eventStat.vastEvents.midpoint);
+			console.log('%c AdMidpoint', style);
+		};
+
+		player.adsvast.AdThirdQuartile = function() {
+			sendEvent(eventStat.vastEvents.thirdQuartile);
+			console.log('%c AdThirdQuartile', style);
 		};
 
 	};

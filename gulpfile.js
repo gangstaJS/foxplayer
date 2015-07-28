@@ -21,9 +21,7 @@ var vjsFiles = [
 gulp.task('javascript', function() {
   return gulp.src(vjsFiles)
   	.pipe(jshint())
-  	.pipe(jshint.reporter('default', {
-        verbose : true
-    }))
+  	.pipe(reporter = jshint.reporter('default', { ignoreWarning: true, verbose: true }))
     .pipe(sourcemaps.init())
     .pipe(concat('concat.js'))
     .pipe(gulp.dest('dist'))

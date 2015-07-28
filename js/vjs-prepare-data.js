@@ -11,7 +11,8 @@ var snapshotPrerolls = [];
 		$videoEl,
 	
 		// ads controls	
-		$skipBtn;
+		$skipBtn,
+		$addClickLayer;
 
 
 	function adsPreRolls(options) {
@@ -25,29 +26,30 @@ var snapshotPrerolls = [];
 
 		snapshotPrerolls = settings.pre.slice();
 
-		// player.on('play', function() { 
-		// 	if(this.currentTime() <= 3) {
-		// 		requestAds()
-		// 	}
-			
-		// });
+
+		player.controlBar.muteToggle.on('click', function() {
+			if(state.adPlaying) {
+				player.trigger( player.muted() ? 'AdMute' : 'AdUnmute' );
+			}
+		});
+
+		player.controlBar.playToggle.on('click', function() {
+			if(state.adPlaying) {
+				player.trigger( player.paused() ? 'AdPause' : 'AdResume' );
+			}
+		});
 
 		player.on('adstart', function() {
-      		console.info('START ADS');
-			// setTimeout(player.pl.hidePoster.bind(this), 200);
+      		this.volume(0.3);
 			tryPrepareNextVast();
-    	});
-
-    	// player.on('adend', function() {
-    	// });  
+    	}); 
 
 		player.on('contentupdate', requestAds);
-    	// if there's already content loaded, request an add immediately
-    	// if(player.currentSrc()) {
-    	//   requestAds();
-    	// }	
 
-    	// player.on('contentupdate', function() { alert(1); });
+    	// if there's already content loaded, request an add immediately
+    	if(player.currentSrc()) {
+    	  requestAds();
+    	};
 
 
     	player.on('readyforpreroll', function() { 		
@@ -67,25 +69,28 @@ var snapshotPrerolls = [];
 
     	// --
 
-		player.on('adcanceled', function() {				
-    		player.ads.endLinearAdMode();
-        	player.adsvast.endTrecking();
-
-        	this.pause();
-        	state.adPlaying = false;
-        	state.prerollPlayed = false;
-        	destructAdsControls();
-
-        	if(settings.pre.length) {
-        		player.trigger('adsnextroll');
-        	} else {
-        		createCookie('lastAds', getUnix());
-          		settings.pre = snapshotPrerolls.slice();;
-        		this.play();
-        	}
-    	});	
+		player.on('adcanceled', adcanceled);	
 
 	}
+
+
+	function adcanceled() {				
+    	player.ads.endLinearAdMode();
+    	player.adsvast.endTrecking();
+
+    	player.pause();
+    	state.adPlaying = false;
+    	state.prerollPlayed = false;
+    	destructAdsControls();
+
+    	if(settings.pre.length) {
+    		player.trigger('adsnextroll');
+    	} else {
+    		createCookie('lastAds', getUnix());
+      		settings.pre = snapshotPrerolls.slice();;
+    		player.play();
+    	}
+    }
 
 	function tryPrepareNextVast() {
 		if(settings.pre.length && predictionCount) {
@@ -143,12 +148,8 @@ var snapshotPrerolls = [];
 					player.trigger('adsready');
 				});
 			}
-
-			// console.log('state.adsMedia', state.adsMedia);
 			
 		} else {
-			// player.trigger('adscanceled');
-
 			console.warn('Preroll is empty', settings.pre.length);
 		}
 	}
@@ -165,37 +166,43 @@ var snapshotPrerolls = [];
         // tell ads plugin we're ready to play our ad
         player.ads.startLinearAdMode();
 
-        player.adsvast.startTrecking(state.adsMedia.vastStats);
+        state.firstQuartile = state.midpoint = state.thirdQuartile = true;
+
+        player.adsvast.startTrecking(state.adsMedia);
+        player.trigger('AdImpression');
+        player.trigger('AdCreativeView');
+        player.trigger('AdStart');
 
         state.adPlaying = true;
 
-        // tell videojs to load the ad
-        // player.src(state.adsMedia);
-        setTimeout(player.pl._setVideoSource.bind(player, state.adsMedia), 100);
-        // player.pl._setVideoSource(state.adsMedia);
+        setTimeout(player.pl._setVideoSource.bind(player, {type: state.adsMedia.type, src: state.adsMedia.src}), 100);
         initAdsControls();
 
-        // when it's finished
+        
         player.one('adended', function() {
-          // play your linear ad content, then when it's finished ...
-          player.ads.endLinearAdMode();
-
-          player.adsvast.endTrecking();
-
-          this.pause();
-          state.adPlaying = false;
-          state.prerollPlayed = false;
-          destructAdsControls();
-
-          if(settings.pre.length) {
-          	console.info('adsnextroll');
-          	player.trigger('adsnextroll');
-          } else {
-          	createCookie('lastAds', getUnix());
-          	settings.pre = snapshotPrerolls.slice();
-          	this.play();
-          }
+        	player.trigger('AdComplete');
+        	adcanceled();
         });
+
+        // player.one('adended', function() {
+        //   player.ads.endLinearAdMode();
+
+        //   player.adsvast.endTrecking();
+
+        //   this.pause();
+        //   state.adPlaying = false;
+        //   state.prerollPlayed = false;
+        //   destructAdsControls();
+
+        //   if(settings.pre.length) {
+        //   	console.info('adsnextroll');
+        //   	player.trigger('adsnextroll');
+        //   } else {
+        //   	createCookie('lastAds', getUnix());
+        //   	settings.pre = snapshotPrerolls.slice();
+        //   	this.play();
+        //   }
+        // });
 
       };
 
@@ -212,42 +219,46 @@ var snapshotPrerolls = [];
 		var $mediaFiles = $vast.find('MediaFiles MediaFile');
 
 		if($mediaFiles.length) {
-			return {
-				vastStats: (getVastEvents($vast) || {}),
+			var data = {
+				vastExtensions: getVastDataBlock($vast.find('Extensions Extension'), 'type'),
+				vastEvents: getVastDataBlock($vast.find('TrackingEvents Tracking'), 'event'),
+				vastClickThrough: $vast.find('VideoClicks ClickThrough').text(),
+				vastImpression: $vast.find('Impression').text(),
 				type: $mediaFiles.eq(0).attr('type'), 
-				src: $mediaFiles.eq(0).text(),
-				skipButton: parseInt($vast.find('Extensions Extension[type=skipButton]').text()),
-				skipTime: $vast.find('Extensions Extension[type=skipTime]').text(),
+				src: $mediaFiles.eq(0).text()
 			};
+
+			console.log(data);
+
+			return data;
+				
 		}
 		return undefined;		
 	};
 
 	// --
 
-	function getVastEvents(vast) {
-		return {
-			skipAd: vast.find('Extensions Extension[type=skipAd]').text(),
-			addClick: vast.find('Extensions Extension[type=addClick]').text(),
-			linkTxt:  vast.find('Extensions Extension[type=linkTxt]').text(),
-			videoClicks: vast.find('VideoClicks ClickThrough').text()
-		}
-	}
+	function getVastDataBlock(elems, attr) {
+		var ext = {};
+		elems.each(function(n,el) {
+			var val = $(this).text();
+			ext[$(this).attr(attr)] = isFinite(val) ? parseInt(val) : val;
+		});
+
+		return ext;
+	};
 
 	// --
 
-	// setInterval(function() {
-	// 	console.log(player.ads.state);
-	// }, 100);
 
+    function initAdsControls() {
+      	$skipBtn = $('<div>', {'class': 'vjs-ads-skip-btn vjs-ads-auto-create', 'text': 'Пропустить>>'});
+      	$addClickLayer = $('<div>', {'class': 'vjs-ads-click-layer vjs-ads-auto-create'});
+		$player.append($skipBtn,$addClickLayer);
 
-      function initAdsControls() {
-      	$skipBtn = $('<div>', {'class': 'vjs-ads-skip-btn', 'text': 'Пропустить>>'});
-		$player.append($skipBtn);
-
-      	state.adsMedia.skipTime = convertToSeconds(state.adsMedia.skipTime);
-      	if(state.adsMedia.skipButton) { // проверяем разрешен ли скип рекламы.
-      		if(state.adsMedia.skipTime <= 0) { // показать скип кнопку сразу
+      	state.adsMedia.vastExtensions.skipTime = convertToSeconds(state.adsMedia.vastExtensions.skipTime);
+      	if(state.adsMedia.vastExtensions.skipButton) { // проверяем разрешен ли скип рекламы.
+      		if(state.adsMedia.vastExtensions.skipTime <= 0) { // показать скип кнопку сразу
       			$skipBtn.show();
       			player.one('adplay', checkSkip);
       		} else {
@@ -261,25 +272,67 @@ var snapshotPrerolls = [];
       		console.info('Skip button disable');
       	}
 
-      	// ---
 
-      	$videoEl.on('click', clickThrough);
+      	// проверяем кликабельный ли видео элемент рекламы
+      	if(state.adsMedia.vastExtensions.isClickable) {
+      		$addClickLayer.html(state.adsMedia.vastExtensions.linkTxt);
+      		$addClickLayer.on('click', clickThrough);
+      	} else {
+      		console.info('isClickable disable');
+      	}
+
+      	player.on('timeupdate', checkTimes);
+
+
+      	// --
+      	
       }
 
       // --
 
       function destructAdsControls() {
-      	$skipBtn.remove();
-      	player.off('timeupdate', checkSkip);
-      	$videoEl.off('click', clickThrough);
+      	try {
+      		$addClickLayer.off('click', clickThrough);
+      		$player.find('.vjs-ads-auto-create').remove(); // remove all ads controls;
+
+      		player.off('timeupdate', checkSkip);  
+      		player.off('timeupdate', checkTimes);    		
+
+      	} catch(e) { console.log(e.message); }
       }
 
 
       // --
 
-      function checkSkip() {
-      	if(this.currentTime() >= state.adsMedia.skipTime) $skipBtn.show();
-      }
+    function checkTimes() {
+    	var dur = player.duration(),
+    		curTime = this.currentTime(),
+    		firstQuartile = dur/4,
+    		midpoint      = dur/2,
+    		thirdQuartile = dur/3;
+
+
+    	if((curTime >= firstQuartile) && state.firstQuartile) {
+    		state.firstQuartile = false;
+    		player.trigger('AdFirstQuartile');
+    	}
+
+    	if((curTime >= midpoint) && state.midpoint) {
+    		state.midpoint = false;
+    		player.trigger('AdMidpoint');
+    	}
+
+    	if((curTime >= thirdQuartile) && state.thirdQuartile) {
+    		state.thirdQuartile = false;
+    		player.trigger('AdThirdQuartile');
+    	}
+    }
+
+    // --
+
+    function checkSkip() {
+    	if(this.currentTime() >= state.adsMedia.vastExtensions.skipTime) $skipBtn.show();
+    }
 
 
       // --
@@ -287,13 +340,13 @@ var snapshotPrerolls = [];
       function skipAds() {
       	$skipBtn.remove();
       	player.off('timeupdate', checkSkip);
-      	player.trigger('adskiped');
+      	player.trigger('AdSkiped');
       	player.trigger('adcanceled');
       	
       }
 
       function clickThrough() {
-      	player.trigger('clickThrough');
+      	player.trigger('AdClickThrough');
       }
 
       // --

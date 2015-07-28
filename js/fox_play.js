@@ -18,6 +18,8 @@ setInterval(function() {
 	$('#time_log').text("Следующий показ рекламы возможен через: "+ can + ' сек');
 }, 500);
 
+// ---
+
 function initPlayer(node, conf, startIndex) {
 	'use strict';
 
@@ -34,7 +36,7 @@ function initPlayer(node, conf, startIndex) {
 		$('body').append(node);
 	}
 	
-	var playerInstance = videojs(node.get(0), {/*techOrder: ['flash'], */'width': '780', 'height': '440'}).ready(function() {
+	var playerInstance = videojs(node.get(0), {techOrder: conf.techOrder, 'width': '780', 'height': '440'}).ready(function() {
 		// this.poster(conf.cover.url);
 		var me = this;
 
@@ -166,8 +168,8 @@ function initPlayer(node, conf, startIndex) {
 			],
 
 			debug: false,
-			timeout: 1000,
-			prerollTimeout: 1000
+			timeout: 2000,
+			prerollTimeout: 3000
 		};
 
 		// me.ads(adsOptions);
