@@ -7,7 +7,7 @@
 
 	var sendEvent = function(url) {
 		$.ajax({url:url, type:'get', dataType:'text'});
-	}
+	};
 
 	// --
 
@@ -33,7 +33,7 @@
 			'ThirdQuartile'
 		];
 
-		var style = 'font-size:20px; color: green;';
+		var style = 'font-size:13px; color: green;';
 	
 
 		player.adsvast.startTrecking = function(events) {

@@ -11,8 +11,8 @@ var snapshotPrerolls = [];
 		$videoEl,
 	
 		// ads controls	
-		$skipBtn,
-		$addClickLayer;
+		skipBtnEl,
+		addClickLayerEl;
 
 
 	function adsPreRolls(options) {
@@ -107,7 +107,6 @@ var snapshotPrerolls = [];
 					} else {
 						state.hasNextVast = true;
 						state.nextVast = media;
-						// console.log('hes next vast', state.nextVast);
 						predictionCount = 5;
 					}
 				}
@@ -122,8 +121,6 @@ var snapshotPrerolls = [];
 			lastAds = (getCookie('lastAds') || 0);
 
 		if((getUnix() - lastAds) >= periodAds) { shouldShowAds = true; }
-
-		console.log(settings.pre.length, shouldShowAds)
 
 		if(settings.pre.length && shouldShowAds) {
 			console.log('requestAds');
@@ -175,7 +172,7 @@ var snapshotPrerolls = [];
 
         state.adPlaying = true;
 
-        setTimeout(player.pl._setVideoSource.bind(player, {type: state.adsMedia.type, src: state.adsMedia.src}), 100);
+        setTimeout(player.pl._setVideoSource.bind(player, {type: state.adsMedia.type, src: state.adsMedia.src}), 1);
         initAdsControls();
 
         
@@ -204,13 +201,13 @@ var snapshotPrerolls = [];
         //   }
         // });
 
-      };
+      }
 
 	// --
 
 	function vastRequest(vastURL) {
 		return $.ajax({url: vastURL, dataType: 'xml'});
-	};
+	}
 
 	// --
 
@@ -234,7 +231,7 @@ var snapshotPrerolls = [];
 				
 		}
 		return undefined;		
-	};
+	}
 
 	// --
 
@@ -246,27 +243,30 @@ var snapshotPrerolls = [];
 		});
 
 		return ext;
-	};
+	}
 
 	// --
 
 
     function initAdsControls() {
-      	$skipBtn = $('<div>', {'class': 'vjs-ads-skip-btn vjs-ads-auto-create', 'text': 'Пропустить>>'});
-      	$addClickLayer = $('<div>', {'class': 'vjs-ads-click-layer vjs-ads-auto-create'});
-		$player.append($skipBtn,$addClickLayer);
+        skipBtnEl = player.createEl('div', {className: 'vjs-ads-skip-btn vjs-ads-auto-create'});
+        skipBtnEl.appendChild(document.createTextNode('Пропустить>>'));
+        player.el().appendChild(skipBtnEl);
+
+
+        addClickLayerEl = player.createEl('div', {className: 'vjs-ads-click-layer vjs-ads-auto-create'});
+        player.el().appendChild(addClickLayerEl);
 
       	state.adsMedia.vastExtensions.skipTime = convertToSeconds(state.adsMedia.vastExtensions.skipTime);
       	if(state.adsMedia.vastExtensions.skipButton) { // проверяем разрешен ли скип рекламы.
       		if(state.adsMedia.vastExtensions.skipTime <= 0) { // показать скип кнопку сразу
-      			$skipBtn.show();
-      			player.one('adplay', checkSkip);
+            skipBtnEl.style.display = 'block';
       		} else {
       			player.on('timeupdate', checkSkip);
       		}
 
 
-      		$skipBtn.on('click', skipAds);
+      		player.on(skipBtnEl, 'click', skipAds);
 
       	} else {
       		console.info('Skip button disable');
@@ -275,8 +275,8 @@ var snapshotPrerolls = [];
 
       	// проверяем кликабельный ли видео элемент рекламы
       	if(state.adsMedia.vastExtensions.isClickable) {
-      		$addClickLayer.html(state.adsMedia.vastExtensions.linkTxt);
-      		$addClickLayer.on('click', clickThrough);
+      		addClickLayerEl.innerHTML = state.adsMedia.vastExtensions.linkTxt;
+      		player.on(addClickLayerEl, 'click', clickThrough);
       	} else {
       		console.info('isClickable disable');
       	}
@@ -292,8 +292,10 @@ var snapshotPrerolls = [];
 
       function destructAdsControls() {
       	try {
-      		$addClickLayer.off('click', clickThrough);
-      		$player.find('.vjs-ads-auto-create').remove(); // remove all ads controls;
+      		player.off(addClickLayerEl, 'click', clickThrough);
+
+          var elems = player.el().getElementsByClassName('vjs-ads-auto-create');
+          while(elems.length) elems[0].parentNode.removeChild(elems[0]);
 
       		player.off('timeupdate', checkSkip);  
       		player.off('timeupdate', checkTimes);    		
@@ -331,14 +333,15 @@ var snapshotPrerolls = [];
     // --
 
     function checkSkip() {
-    	if(this.currentTime() >= state.adsMedia.vastExtensions.skipTime) $skipBtn.show();
+    	if(this.currentTime() >= state.adsMedia.vastExtensions.skipTime)
+        skipBtnEl.style.display = 'block';
     }
 
 
       // --
 
       function skipAds() {
-      	$skipBtn.remove();
+      	skipBtnEl.remove();
       	player.off('timeupdate', checkSkip);
       	player.trigger('AdSkiped');
       	player.trigger('adcanceled');

@@ -13,7 +13,7 @@ var vjsFiles = [
   	'./js/vjs-vast-trecking.js',
   	'./js/videojs.ads.js',
   	'./js/vjs-prepare-data.js',  	
-  	'./js/fox_play.js'
+  	'./js/vjs-start-foxplayer.js'
 ];
 
 // --
