@@ -121,6 +121,7 @@
 
             // Toggle Fullscreen with the F key
             case  70:
+              event.preventDefault();
               if (enableFull) {
                 if (player.isFullscreen()) {
                   player.exitFullscreen();

@@ -8,6 +8,7 @@
     "gulp-sourcemaps": "latest",
     "gulp-uglify": "latest",
     "gulp-rename": "latest",
-    "gulp-jshint": "latest"
+    "gulp-jshint": "latest",
+    "gulp-sftp": "latest"
   }
 }

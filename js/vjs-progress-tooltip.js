@@ -17,8 +17,6 @@
 
 		$progressBar.append($tooltip, $tooltipLine, $fakeHolde);
 
-
-
 		// $progressBar.on('mouseout', function() {
 		// 	$tooltip.fadeOut();
 		// 	// me.off('timeupdate', updateTipLine);

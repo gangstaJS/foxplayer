@@ -118,7 +118,10 @@
   };
   
   vjs.Player.prototype.byIndex = function(index){
-    this.trigger('setByIndex');
+    if(this.currentSrc()) {
+      this.trigger('adstop');
+    };
+
     this.pl._setVideo(index);
     return this;
   };

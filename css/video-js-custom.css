@@ -116,6 +116,10 @@ filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#40000000', e
 
 }
 
+.vjs-top-bar {
+	text-align: left;
+}
+
 .vjs-top-bar > div {
 	margin-top: 5px;
 	float: right;
@@ -127,6 +131,7 @@ filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#40000000', e
   	white-space: nowrap;
   	overflow: hidden;
   	text-overflow: ellipsis;
+  	float: left;
 }
 
 .vjs-top-bar .vjs-collaps,
@@ -209,6 +214,9 @@ filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#40000000', e
 	display: none;
 	line-height: 31px;
   	padding-left:10px;
+  	z-index: 998;
+  	text-align: left;
+
 }
 
 .fox_collapse_bl > div {
@@ -221,8 +229,8 @@ filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#40000000', e
 	white-space: nowrap;
 	overflow: hidden;
 	text-overflow: ellipsis;
+	float: left;
 }
-
 .fox_collapse_bl .fox_close_player,
 .fox_collapse_bl .fox_expand_player {
 	text-align: center;
@@ -490,4 +498,32 @@ filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#40000000', e
 
 .vjs-ad-playing .vjs-ads-click-layer {
 	display: block;
+}
+
+.ui-icon, .ui-widget-content .ui-icon {
+	background-position: 3px 3px;
+	z-index: 99;
+    background-image: url("../img/angle.png");
+}
+.ui-icon {
+    width: 16px;
+    height: 16px;
+}
+
+/**/
+.vjs-default-skin .vjs-seek-handle {
+	height: 7px;
+	top: 6px;
+	width: 6px;
+
+	-webkit-transition:all 50ms ease;
+	-moz-transition:   all 50ms ease;
+	-ms-transition:    all 50ms ease;
+	-o-transition:     all 50ms ease;
+	transition:        all 50ms ease;
+}
+
+.vjs-progress-control:hover .vjs-seek-handle {
+	top: 3px !important;
+	height: 13px !important;
 }

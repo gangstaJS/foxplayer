@@ -13,7 +13,11 @@ e.g. <video class="video-js my-skin-name">
 .vjs-default-skin {
   color: #fff;
   box-shadow: 0px 2px 23px -2px rgba(0,0,0,.9);
+  z-index: 999;
+  top: 100px;
+  left: 100px;
 }
+
 /* Custom Icon Font
 --------------------------------------------------------------------------------
 The control icons are from a custom font. Each icon corresponds to a character
@@ -615,7 +619,7 @@ easily in the skin designer. http://designer.videojs.com/
 .vjs-loading-spinner {
   /* Should be hidden by default */
   display: none;
-  font-size: 25px;
+  font-size: 13px;
   width: 1em;
   height: 1em;
   border-radius: 50%;

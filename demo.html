@@ -6,9 +6,7 @@
   <meta charset="utf-8">
   
   <link rel="stylesheet" href="//ajax.googleapis.com/ajax/libs/jqueryui/1.11.1/themes/smoothness/jquery-ui.css" />
-  <link href="css/video-js.css" rel="stylesheet" type="text/css">
-  <link href="css/video-js-custom.css" rel="stylesheet" type="text/css">
-  <link rel="stylesheet" href="css/videojs.ads.css">
+  <link href="dist/concat.css" rel="stylesheet" type="text/css">
 
   <script type="text/javascript" src="js/jquery.min.js"></script>
   <script type="text/javascript" src="js/jquery-ui.min.js"></script>
@@ -43,57 +41,7 @@
 
 
 <script src="dist/vjs.min.js"></script>
-<script type="text/javascript">
-
-	var player_conf = {
-		cover: {url: 'http://i.ytimg.com/vi/J3r-ct0haZg/hqdefault.jpg'},
-		playlist: [
-			{ "title": "jailhouse rock", "type": "video", "src": "http://www.ex.ua/test_player/data/jailhouse.mp4"}, 
-			// { "title": "Guns N' Roses - November Rain", "type": "video", "src": "data/november_rain.720.mp4" },
-			{ "title": "My", "type": "audio", "src": "http://www.ex.ua/test_player/data/my.mp3"},
-			{ "title": "jailhouse rock", "type": "video", "src": "http://www.ex.ua/test_player/data/jailhouse.mp4"}
-		],
-		techOrder: ['html5']
-	};
-	
-	// --
-	
-	var p;
-	var c_bl = $('.fox_collapse_bl');
-
-	$('.go_byindex').click(function() {
-		if(typeof p === 'object') {
-			if(p.el()) {
-				p.byIndex($(this).data('index'));
-			} else {
-				p = initPlayer('fox_player', player_conf, $(this).data('index'));
-				p.on('collapse', function() {
-					c_bl.show();
-				});
-			}	
-		} else {
-			p = initPlayer('fox_player', player_conf, $(this).data('index'));
-
-			p.on('collapse', function(e) {
-				c_bl.find('span').text(this.pl.currentVideo.title);
-				c_bl.show();
-			});
-		}
-
-		p.trigger('open');	
-		c_bl.hide();
-	});
-
-	$('.fox_expand_player').on('click', function() {
-		c_bl.hide();
-		p.trigger('open');
-	});
-
-	$('.fox_close_player').on('click', function() {
-		c_bl.hide();
-		p.trigger('close');
-	});
-</script>
+<script src="js/init.js"></script>
 
 </body>
 </html>

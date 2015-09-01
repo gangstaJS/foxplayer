@@ -1,22 +1,23 @@
 /**
 	OZ@EX.UA
 */
-var periodAds = 30; // 300s == 5m	
+var periodAds = 300; // 300s == 5m	
 
 // --
 
-setInterval(function() {
-	lastAds = (getCookie('lastAds') || 0);
-	var diff = (Math.floor((new Date()).getTime()/1000) - lastAds);
 
-	var can = 0;
+// setInterval(function() {
+// 	lastAds = (getCookie('lastAds') || 0);
+// 	var diff = (Math.floor((new Date()).getTime()/1000) - lastAds);
 
-	if(diff <= periodAds) {
-		can = periodAds-diff;
-	}
+// 	var can = 0;
 
-	$('#time_log').text("Следующий показ рекламы возможен через: "+ can + ' сек');
-}, 500);
+// 	if(diff <= periodAds) {
+// 		can = periodAds-diff;
+// 	}
+
+// 	$('#time_log').text("Следующий показ рекламы возможен через: "+ can + ' сек');
+// }, 500);
 
 // ---
 
@@ -86,6 +87,23 @@ function initPlayer(node, conf, startIndex) {
 			this.dispose();
 		});
 
+		me.on('error', function() {
+			var err = me.error();
+
+			if(err && err.code == 4) {
+				if(me.ads && me.ads.state == 'content-playback') {
+					me.trigger('adcanceled');
+					console.log('try cansel ADS');
+				} else {
+					console.log('try play next');
+					if(conf.playlist.length > 1) me.next();
+				}
+				
+			} else {
+				console.log(err);
+			}
+		});
+
 		me.controlBar.muteToggle.on('click', function() {
 			if((me.muted() && !me.volume()) || (!me.muted() && !me.volume())) {
 				me.volume(0.25);
@@ -147,6 +165,7 @@ function initPlayer(node, conf, startIndex) {
 					this.seekBar.update();
 				}
 			});
+
 		} else {
 			me.controlBar.progressControl.on('mousedown', function() { down = true; });
 
@@ -161,19 +180,10 @@ function initPlayer(node, conf, startIndex) {
 
 		// --
 
-		var adsOptions = {
-			'pre': [
-				{url: 'http://ads.adfox.ru/175105/getCode?p1=bsyyj&p2=emxn&pfc=a&pfb=a&plp=a&pli=a&pop=a&puid1=&puid2=&puid3=&puid22=&puid25=&puid27=&puid31=&puid33=&puid51=&puid52='},
-				{url: 'http://ads.adfox.ru/175105/getCode?p1=bsyyk&p2=emxn&pfc=a&pfb=a&plp=a&pli=a&pop=a&puid1=&puid2=&puid3=&puid22=&puid25=&puid27=&puid31=&puid33=&puid51=&puid52='}
-			],
-
-			debug: false,
-			timeout: 2000,
-			prerollTimeout: 3000
-		};
-
-		// me.ads(adsOptions);
-		me.adsPreRolls(adsOptions);
+		if(conf.adsOptions.pre && conf.adsOptions.pre.length) {
+			me.adsPreRolls(conf.adsOptions);
+		}
+		
 
 
 	});	// end player ready
@@ -184,11 +194,7 @@ function initPlayer(node, conf, startIndex) {
 
 	$player.draggable({
 		handle: '.vjs-top-bar',
-		create: function( event, ui ) {
-			$player.css({top: ($(window).height()-$player.height())/2+'px', left: ($(window).width()-$player.width())/2+'px'});
-		},
-		scroll: false,
-		containment: "parent"
+		containment: "window"
 	});
 
 	// playerInstance.userActive(true);
@@ -214,7 +220,10 @@ function initPlayer(node, conf, startIndex) {
 	
 		playerInstance.on('ended', function() {
 			console.info('%c'+this.ads.state, 'color: #000; background-color: yellow; font-size: 18px');
-			if((conf.playlist.length > 1) && (this.ads.state == 'postroll?')) {
+			if(
+				((conf.playlist.length > 1) && (this.ads.state == 'postroll?')) ||
+				!conf.adsOptions.pre.length
+				) {
 				this.next();
 				console.info('next media start');
 			}
@@ -241,7 +250,7 @@ function createCookie(name, value, days) {
 		host = window.location.host.split(':')[0];
 	}
 	
-	document.cookie = name + "=" + value + expires + ";domain=."+ host +";path=/";
+	document.cookie = name + "=" + value + expires + ";domain="+ host +";path=/";
 }
 
 function getCookie(c_name) {
