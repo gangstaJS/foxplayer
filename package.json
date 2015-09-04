@@ -9,6 +9,6 @@
     "gulp-uglify": "latest",
     "gulp-rename": "latest",
     "gulp-jshint": "latest",
-    "gulp-sftp": "latest"
+    "gulp-ssh": "latest"
   }
 }

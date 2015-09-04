@@ -25,6 +25,7 @@
 
       player.pl._setVideoSource = function(src/*, poster*/) {
         player.src(src);
+        
         player.pl._updatePoster(options.cover.url);
         
       };
@@ -67,7 +68,7 @@
         // }
 
         // proc.startProccess(player.pl.currentVideo);
-        player.$title.text(player.pl.currentVideo.title);
+        player.$title.html(player.pl.currentVideo.title);
         
         if(player.pl.currentVideo.type == "audio") {
         	setTimeout(player.pl.showPoster.bind(this), 400);
@@ -75,7 +76,13 @@
         	player.pl.hidePoster();
         }
 
-        player.pl._setVideoSource(player.pl.currentVideo.src/*, player.pl.currentVideo.attr('poster')*/);
+        if(player.pl.currentVideo.type == "audio") {
+          player.pl._setVideoSource({src: player.pl.currentVideo.src, type: 'audio/mp3'}/*, player.pl.currentVideo.attr('poster')*/);
+        } else {
+          player.pl._setVideoSource({src: player.pl.currentVideo.src, type: 'video/mp4'}/*, player.pl.currentVideo.attr('poster')*/);
+        }
+
+        
         // setTimeout(player.play.bind(player), 3000);
         
       }

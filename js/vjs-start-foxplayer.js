@@ -41,6 +41,10 @@ function initPlayer(node, conf, startIndex) {
 		// this.poster(conf.cover.url);
 		var me = this;
 
+		me.storage = null;
+
+		if(window.localStorage) me.storage = window.localStorage;
+
 		var $top_bar = $('<div>', {'class': 'vjs-top-bar'});
 		$top_bar.append('<span></span> <div><i class="vjs-collaps"></i><i class="vjs-close"></i><div>');
 		var $p = $(this.el());
@@ -83,6 +87,20 @@ function initPlayer(node, conf, startIndex) {
 			$(this.el()).show();
 		});
 
+		me.on("volumechange", function() {
+      		console.log(me.volume());
+      		if(me.storage) {
+      			me.storage.setItem('vol', me.volume());
+      		}
+    	});
+
+		if(me.storage) {
+			var vol = me.storage.getItem('vol') || 0.5;
+			me.volume(vol);
+		} else {
+			me.volume(0.5);
+		}
+
 		me.on('close', function() {
 			this.dispose();
 		});
@@ -90,14 +108,16 @@ function initPlayer(node, conf, startIndex) {
 		me.on('error', function() {
 			var err = me.error();
 
+			console.log('Error NOT ADS');
+
 			if(err && err.code == 4) {
-				if(me.ads && me.ads.state == 'content-playback') {
-					me.trigger('adcanceled');
-					console.log('try cansel ADS');
-				} else {
+				// if(me.ads && me.ads.state == 'content-playback') {
+				// 	me.trigger('adcanceled');
+				// 	console.log('try cansel ADS');
+				// } else {
 					console.log('try play next');
 					if(conf.playlist.length > 1) me.next();
-				}
+				// }
 				
 			} else {
 				console.log(err);

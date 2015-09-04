@@ -172,7 +172,7 @@
     };
 
     player.on('keydown', keyDown);
-    player.on('dblclick', doubleClick);
+    // player.on('dblclick', doubleClick);
 
     return this;
   };

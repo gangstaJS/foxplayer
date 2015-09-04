@@ -1,20 +1,11 @@
-var gulp = require('gulp');
-var concat = require('gulp-concat');
-var sourcemaps = require('gulp-sourcemaps');
-var uglify = require('gulp-uglify');
-var rename = require('gulp-rename');
-var jshint = require('gulp-jshint');
-var sftp = require('gulp-sftp');
-
-
-var sftpConf = {
-    host: 'ex.ua',
-    user: 'fexpub',
-    key: {
-      location: './secret/id_rsa'
-    },
-    remotePath: '/home/fex/htdocs/ex2_player_test/dist'
-};
+const gulp = require('gulp');
+const concat = require('gulp-concat');
+const sourcemaps = require('gulp-sourcemaps');
+const uglify = require('gulp-uglify');
+const rename = require('gulp-rename');
+const jshint = require('gulp-jshint');
+const GulpSSH  = require('gulp-ssh');
+const fs  = require('fs');
 
 var vjsFiles = [
     './js/video.js', 
@@ -34,6 +25,17 @@ var vjsCss = [
   './css/videojs.ads.css'
 ];
 
+var config = {
+  host: 'ex.ua',
+  username: 'fexpub',
+  privateKey: fs.readFileSync('./secret/id_rsa')
+}
+
+var gulpSSH = new GulpSSH({
+  ignoreErrors: false,
+  sshConfig: config
+})
+
 // --
  
 gulp.task('js', function() {
@@ -44,7 +46,23 @@ gulp.task('js', function() {
     .pipe(concat('concat.js'))
     .pipe(gulp.dest('dist'))
     .pipe(rename('vjs.min.js'))
-    .pipe(uglify())
+    .pipe(uglify({
+        sourceMap: false,
+        // sourceMapIn: 'build/temp/video.js.map',
+        // sourceMapRoot: '../../src/js',
+        preserveComments: 'some',
+        mangle: true,
+        compress: {
+          sequences: true,
+          dead_code: true,
+          conditionals: true,
+          booleans: true,
+          unused: true,
+          if_return: true,
+          join_vars: true,
+          drop_console: false
+        }
+      }))
     .pipe(sourcemaps.write())
     .pipe(gulp.dest('dist'));
 });
@@ -59,17 +77,22 @@ gulp.task('css', function() {
     .pipe(gulp.dest('dist'));
 });
 
-gulp.task('sftp', function() {
-   return gulp.src('./dist/*')
-    .pipe(sftp(sftpConf));
-});
 
+gulp.task('dest', ['js', 'css'], function () {
+  return gulp.src('./dist/*')
+    .pipe(gulpSSH.dest('/home/fex/htdocs/ex2_player_test/dist'))
+})
 // --
 
-gulp.task('default', ['js', 'css', 'sftp', 'watch']);
+gulp.task('default', [
+  'dest', 
+  'watch'
+  ]);
 
 gulp.task('watch', function() {
-    gulp.watch(['js/*.js', 'css/*.css'], ['js', 'css', 'sftp']);
+    gulp.watch(['js/*.js', 'css/*.css'], [ 
+      'dest'
+      ]);
 });
 
 // --

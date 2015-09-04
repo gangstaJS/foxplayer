@@ -14,7 +14,6 @@ var snapshotPrerolls = [];
 		skipBtnEl,
 		addClickLayerEl;
 
-
 	function adsPreRolls(options) {
 		player = this;
 		settings = options;
@@ -37,6 +36,13 @@ var snapshotPrerolls = [];
 				player.trigger( player.paused() ? 'AdPause' : 'AdResume' );
 			}
 		});
+
+    player.on('aderror', function() {
+      var err = player.error();
+
+      console.log(err);
+      adcanceled();
+    }); 
 
 		player.on('adstart', function() {
       		this.volume(0.3);
@@ -79,18 +85,20 @@ var snapshotPrerolls = [];
   	player.ads.endLinearAdMode();
   	player.adsvast.endTrecking();
 
-  	player.pause();
+  	// player.pause();
   	state.adPlaying = false;
   	state.prerollPlayed = false;
   	destructAdsControls();
 
   	if(settings.pre.length) {
   		player.trigger('adsnextroll');
+
   	} else {
   		createCookie('lastAds', getUnix());
-    		settings.pre = snapshotPrerolls.slice();;
+    	settings.pre = snapshotPrerolls.slice();;
   		player.play();
   	}
+    player.play();
   }
 
   function adStop() {
@@ -177,9 +185,14 @@ var snapshotPrerolls = [];
 
         state.adPlaying = true;
 
-        setTimeout(player.pl._setVideoSource.bind(player, {type: state.adsMedia.type, src: state.adsMedia.src}), 1);
-        initAdsControls();
 
+
+        setTimeout(player.pl._setVideoSource.bind(player, {type: state.adsMedia.type, src: state.adsMedia.src}), 1);
+        // player.pl._setVideoSource({type: state.adsMedia.type, src: state.adsMedia.src});
+        
+        player.one('adloadstart', function() {
+          initAdsControls();
+        });
         
         player.one('adended', function() {
         	player.trigger('AdComplete');
@@ -211,6 +224,7 @@ var snapshotPrerolls = [];
 	// --
 
 	function vastRequest(vastURL) {
+    console.log('vastURL >>>', vastURL);
 		return $.ajax({url: vastURL, dataType: 'xml'});
 	}
 
@@ -254,24 +268,29 @@ var snapshotPrerolls = [];
 
 
     function initAdsControls() {
-      skipBtnEl = player.createEl('div', {className: 'vjs-ads-skip-btn vjs-ads-auto-create'});
-      skipBtnEl.appendChild(document.createTextNode('Пропустить>>'));
-      player.el().appendChild(skipBtnEl);
+      try {
+        skipBtnEl = $('<div>', {'class': 'vjs-ads-skip-btn vjs-ads-auto-create'});
+        skipBtnEl.text('Пропустить>>');      
+        player.el().appendChild(skipBtnEl.get(0));
 
-
-      addClickLayerEl = player.createEl('div', {className: 'vjs-ads-click-layer vjs-ads-auto-create'});
-      player.el().appendChild(addClickLayerEl);
+        addClickLayerEl = $('<div>', {'class': 'vjs-ads-click-layer vjs-ads-auto-create'});
+        player.el().appendChild(addClickLayerEl.get(0));
+      } catch(e) { 
+        console.warn('skipBtnEl', skipBtnEl);
+        console.warn('addClickLayerEl', addClickLayerEl);
+        console.warn(e.message); 
+      }      
 
     	state.adsMedia.vastExtensions.skipTime = convertToSeconds(state.adsMedia.vastExtensions.skipTime);
     	if(state.adsMedia.vastExtensions.skipButton) { // проверяем разрешен ли скип рекламы.
     		if(state.adsMedia.vastExtensions.skipTime <= 0) { // показать скип кнопку сразу
-          skipBtnEl.style.display = 'block';
+          skipBtnEl.css('display', 'block');
     		} else {
     			player.on('timeupdate', checkSkip);
     		}
 
 
-    		player.on(skipBtnEl, 'click', skipAds);
+    		player.on(skipBtnEl.get(0), 'click', skipAds);
 
     	} else {
     		console.info('Skip button disable');
@@ -280,8 +299,8 @@ var snapshotPrerolls = [];
 
     	// проверяем кликабельный ли видео элемент рекламы
     	if(state.adsMedia.vastExtensions.isClickable) {
-    		addClickLayerEl.innerHTML = state.adsMedia.vastExtensions.linkTxt;
-    		player.on(addClickLayerEl, 'click', clickThrough);
+    		addClickLayerEl.html(state.adsMedia.vastExtensions.linkTxt);
+    		player.on(addClickLayerEl.get(0), 'click', clickThrough);
     	} else {
     		console.info('isClickable disable');
     	}
@@ -297,10 +316,9 @@ var snapshotPrerolls = [];
 
     function destructAdsControls() {
     	try {
-    		player.off(addClickLayerEl, 'click', clickThrough);
+    		player.off(addClickLayerEl.get(0), 'click', clickThrough);
 
-        var elems = player.el().getElementsByClassName('vjs-ads-auto-create');
-        while(elems.length) elems[0].parentNode.removeChild(elems[0]);
+        $('.vjs-ads-auto-create').remove();
 
     		player.off('timeupdate', checkSkip);  
     		player.off('timeupdate', checkTimes);    		
@@ -338,7 +356,7 @@ var snapshotPrerolls = [];
 
     function checkSkip() {
     	if(this.currentTime() >= state.adsMedia.vastExtensions.skipTime)
-        skipBtnEl.style.display = 'block';
+        skipBtnEl.css('display', 'block');
     }
 
 
