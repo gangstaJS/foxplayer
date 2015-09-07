@@ -36,8 +36,10 @@ function initPlayer(node, conf, startIndex) {
 		node = $('<video>', {"class": "video-js vjs-default-skin", controls: "controls", autoplay: "autoplay"});
 		$('body').append(node);
 	}
+
+	conf.inactivityTimeout = 500;
 	
-	var playerInstance = videojs(node.get(0), {techOrder: conf.techOrder, 'width': '780', 'height': '440'}).ready(function() {
+	var playerInstance = videojs(node.get(0), {techOrder: conf.techOrder, inactivityTimeout: conf.inactivityTimeout, 'width': '780', 'height': '440'}).ready(function() {
 		// this.poster(conf.cover.url);
 		var me = this;
 
@@ -128,6 +130,8 @@ function initPlayer(node, conf, startIndex) {
 				console.warn(err);
 			}
 		});
+
+		me.on('play', function() { $(me.el()).removeClass('vjs-error'); });
 
 		me.controlBar.muteToggle.on('click', function() {
 			if((me.muted() && !me.volume()) || (!me.muted() && !me.volume())) {
@@ -242,10 +246,9 @@ function initPlayer(node, conf, startIndex) {
 		prevBtn.addEventListener('click', function() {
 			playerInstance.prev();
 		}, false);
-
-		playerInstance.endedTomeout = null;
 	
 		playerInstance.on('ended', function() {
+			console.log('ENDED');
 			console.info('%c'+this.ads.state, 'color: #000; background-color: yellow; font-size: 18px');
 			if(
 				((conf.playlist.length > 1) && (this.ads.state == 'postroll?')) 
@@ -254,11 +257,39 @@ function initPlayer(node, conf, startIndex) {
 						this.next();
 						console.info('next media start');			
 
-				// player.one('adended', function() {
-				// 	console.log('ADDENDED!!');
-    // 			}); 
+			} else if((conf.playlist.length > 1) &&  (this.ads.state == 'content-playback')) {
+				playerInstance.play();
 			}
 		});
+
+		// var delay = 250,timer = null,clicks = 0;
+
+
+		// me.on('mousedown', function(event) {
+		// 	var self = this;
+
+		//  	clicks++;
+
+		//  	console.log(1);
+		
+		//  	if(clicks == 1) {
+		//  	  timer = setTimeout(function(){
+		//  	    clicks = 0;
+		
+		//  	    if (self.player().controls()) {
+		//  	      if (self.player().paused()) {
+		//  	        self.player().play();
+		//  	      } else {
+		//  	        self.player().pause();
+		//  	      }
+		//  	    }
+		
+		//  	  }, delay);
+		//  	} else {
+		//  	  clearTimeout(timer);
+		//  	  clicks = 0;
+		//  	}
+		// });
 
 		// playerInstance.on('adtimeout', function() {
 		// 	console.info('%c'+this.ads.state, 'color: #000; background-color: green; font-size: 18px');

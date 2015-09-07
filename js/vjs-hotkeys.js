@@ -172,7 +172,46 @@
     };
 
     player.on('keydown', keyDown);
-    // player.on('dblclick', doubleClick);
+    player.on('dblclick', doubleClick);
+
+    var lastTime = (new Date()).getTime(), timeout;
+
+    player.on(['mousewheel', 'DOMMouseScroll'], function(e) {
+      e.preventDefault();
+      var curVol = player.volume();
+
+      var delta = Math.max(-1, Math.min(1, (e.wheelDelta || -e.detail)));
+
+      if((e.timeStamp-lastTime) > 100) {
+        timeout = setTimeout(function() {
+          if(delta == 1) {
+              if(curVol < 1) {
+                if(player.muted()) player.muted(false);
+                curVol += 0.05;
+              }
+          } else if(delta == -1) {
+            if(curVol) {
+                curVol -= 0.05;
+              }
+          }
+
+          lastTime = (new Date()).getTime();
+
+          player.volume(curVol);
+
+          console.log(curVol);
+        }, 10);
+      } else {
+        clearTimeout(timeout);
+      }
+
+      
+
+    });
+
+    // player.one('volumechange', function(e) {
+    //   curVol = player.volume();
+    // });
 
     return this;
   };

@@ -30,7 +30,8 @@
 			'Resume',
 			'FirstQuartile',
 			'Midpoint',
-			'ThirdQuartile'
+			'ThirdQuartile',
+			'Error'
 		];
 
 		var style = 'font-size:13px; color: green;';
@@ -121,6 +122,11 @@
 		player.adsvast.AdThirdQuartile = function() {
 			sendEvent(eventStat.vastEvents.thirdQuartile);
 			console.log('%c AdThirdQuartile', style);
+		};
+
+		player.adsvast.AdError = function() {
+			sendEvent(eventStat.playerError);
+			console.log('%c AdError', style + 'color:red;');
 		};
 
 	};

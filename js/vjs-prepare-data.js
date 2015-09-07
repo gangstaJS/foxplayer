@@ -6,7 +6,7 @@ var snapshotPrerolls = [];
 	var state = {}, 
 		settings = {}, 
 		player, 
-		predictionCount = 5, 
+		predictionCount = 2, 
 		$player,
 		$videoEl,
 	
@@ -43,6 +43,8 @@ var snapshotPrerolls = [];
 
     player.on('aderror', function() {
       var err = player.error();
+
+      player.trigger('AdError');
 
       console.log(err);
 
@@ -140,7 +142,9 @@ var snapshotPrerolls = [];
 
 		if((getUnix() - lastAds) >= periodAds) { shouldShowAds = true; }
 
-		if(settings.pre.length && shouldShowAds && (player.pl.currentVideo.type !== 'audio')) {
+    var isFlashTech = $('#'+player.id()+'_flash_api').length ? 1 : 0;
+
+		if(settings.pre.length && shouldShowAds && (player.pl.currentVideo.type !== 'audio') && !isFlashTech) {
 			console.log('requestAds');
 			var deferred;
 
@@ -245,6 +249,7 @@ var snapshotPrerolls = [];
 				vastEvents: getVastDataBlock($vast.find('TrackingEvents Tracking'), 'event'),
 				vastClickThrough: $vast.find('VideoClicks ClickThrough').text(),
 				vastImpression: $vast.find('Impression').text(),
+        playerError: $vast.find('Error').text(),
 				type: $mediaFiles.eq(0).attr('type'), 
 				src: $mediaFiles.eq(0).text()
 			};

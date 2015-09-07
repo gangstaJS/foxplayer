@@ -48,9 +48,9 @@ gulp.task('js', function() {
     .pipe(rename('vjs.min.js'))
     .pipe(uglify({
         sourceMap: false,
-        // sourceMapIn: 'build/temp/video.js.map',
-        // sourceMapRoot: '../../src/js',
-        preserveComments: 'some',
+        // sourceMapIn: 'dist/vjs.min.js.map',
+        // sourceMapRoot: './',
+        preserveComments: false,
         mangle: true,
         compress: {
           sequences: true,
