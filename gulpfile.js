@@ -29,12 +29,12 @@ var config = {
   host: 'ex.ua',
   username: 'fexpub',
   privateKey: fs.readFileSync('./secret/id_rsa')
-}
+};
 
 var gulpSSH = new GulpSSH({
   ignoreErrors: false,
   sshConfig: config
-})
+});
 
 // --
  
@@ -80,8 +80,8 @@ gulp.task('css', function() {
 
 gulp.task('dest', ['js', 'css'], function () {
   return gulp.src('./dist/*')
-    .pipe(gulpSSH.dest('/home/fex/htdocs/ex2_player_test/dist'))
-})
+    .pipe(gulpSSH.dest('/home/fex/htdocs/ex2_player_test/dist'));
+});
 // --
 
 gulp.task('default', [

@@ -43,6 +43,10 @@ function initPlayer(node, conf, startIndex) {
 
 		me.storage = null;
 
+		setTimeout(function() {
+			$(me.el()).focus();
+		}, 500);
+
 		if(window.localStorage) me.storage = window.localStorage;
 
 		var $top_bar = $('<div>', {'class': 'vjs-top-bar'});
@@ -108,19 +112,20 @@ function initPlayer(node, conf, startIndex) {
 		me.on('error', function() {
 			var err = me.error();
 
-			console.log('Error NOT ADS');
+			console.log('Error NOT ADS', err);
 
 			if(err && err.code == 4) {
+				$(me.el()).removeClass('vjs-error');
 				// if(me.ads && me.ads.state == 'content-playback') {
 				// 	me.trigger('adcanceled');
 				// 	console.log('try cansel ADS');
 				// } else {
-					console.log('try play next');
-					if(conf.playlist.length > 1) me.next();
+					// console.log('try play next');
+					// if(conf.playlist.length > 1) me.next();
 				// }
 				
 			} else {
-				console.log(err);
+				console.warn(err);
 			}
 		});
 
@@ -237,22 +242,32 @@ function initPlayer(node, conf, startIndex) {
 		prevBtn.addEventListener('click', function() {
 			playerInstance.prev();
 		}, false);
+
+		playerInstance.endedTomeout = null;
 	
 		playerInstance.on('ended', function() {
 			console.info('%c'+this.ads.state, 'color: #000; background-color: yellow; font-size: 18px');
 			if(
-				((conf.playlist.length > 1) && (this.ads.state == 'postroll?')) ||
-				!conf.adsOptions.pre.length
+				((conf.playlist.length > 1) && (this.ads.state == 'postroll?')) 
+				// || !conf.adsOptions.pre.length
 				) {
-				this.next();
-				console.info('next media start');
+						this.next();
+						console.info('next media start');			
+
+				// player.one('adended', function() {
+				// 	console.log('ADDENDED!!');
+    // 			}); 
 			}
 		});
+
+		// playerInstance.on('adtimeout', function() {
+		// 	console.info('%c'+this.ads.state, 'color: #000; background-color: green; font-size: 18px');
+		// });
 
 	}
 
 	return playerInstance;
-};
+}
 
 // ---
 

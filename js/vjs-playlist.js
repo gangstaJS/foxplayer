@@ -10,6 +10,8 @@
     var player = this;
       player.pl = player.pl || {};
 
+    player.tmpcounter = 1;
+
       if(startIndex !== undefined) player.pl.current = parseInt(startIndex);
 
     player.pl.items = options.playlist;
@@ -34,7 +36,8 @@
 
       player.pl._resumeVideo = function() {
         player.one('loadstart',function() {
-          setTimeout(player.play.bind(player), 1000);
+          // setTimeout(player.play.bind(player), 1000);
+          player.play();
           // player.posterImage.hide();
         });
       };
@@ -64,7 +67,7 @@
         player.pl.currentVideo = player.pl.items[index];
     
         // if (!player.paused()){
-          player.pl._resumeVideo();
+          // player.pl._resumeVideo();
         // }
 
         // proc.startProccess(player.pl.currentVideo);
@@ -77,10 +80,16 @@
         }
 
         if(player.pl.currentVideo.type == "audio") {
-          player.pl._setVideoSource({src: player.pl.currentVideo.src, type: 'audio/mp3'}/*, player.pl.currentVideo.attr('poster')*/);
+          options.adsOptions.timeout = 0;
+          player.pl._setVideoSource({src: player.pl.currentVideo.src, type: 'audio/mpeg'}/*, player.pl.currentVideo.attr('poster')*/);
         } else {
+          options.adsOptions.timeout = 2000;
           player.pl._setVideoSource({src: player.pl.currentVideo.src, type: 'video/mp4'}/*, player.pl.currentVideo.attr('poster')*/);
         }
+
+        console.info('%c'+(player.tmpcounter++) + ' [' +  player.pl.currentVideo.title+']', 'color: #fff; background-color: green; font-size: 23px');
+
+        player.pl._resumeVideo();
 
         
         // setTimeout(player.play.bind(player), 3000);

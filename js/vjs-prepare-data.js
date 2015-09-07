@@ -14,9 +14,13 @@ var snapshotPrerolls = [];
 		skipBtnEl,
 		addClickLayerEl;
 
+    console.log('Changes set');
+
 	function adsPreRolls(options) {
 		player = this;
 		settings = options;
+    settings.postrollTimeout = 0;
+    
 		$player = $(player.el());
 		$videoEl = $('#'+player.id());
 
@@ -41,6 +45,7 @@ var snapshotPrerolls = [];
       var err = player.error();
 
       console.log(err);
+
       adcanceled();
     }); 
 
@@ -54,7 +59,7 @@ var snapshotPrerolls = [];
     	// if there's already content loaded, request an add immediately
     	if(player.currentSrc()) {
     	  requestAds();
-    	};
+    	}
 
 
     	player.on('readyforpreroll', function() { 		
@@ -95,7 +100,7 @@ var snapshotPrerolls = [];
 
   	} else {
   		createCookie('lastAds', getUnix());
-    	settings.pre = snapshotPrerolls.slice();;
+    	settings.pre = snapshotPrerolls.slice();
   		player.play();
   	}
     player.play();
@@ -135,7 +140,7 @@ var snapshotPrerolls = [];
 
 		if((getUnix() - lastAds) >= periodAds) { shouldShowAds = true; }
 
-		if(settings.pre.length && shouldShowAds) {
+		if(settings.pre.length && shouldShowAds && (player.pl.currentVideo.type !== 'audio')) {
 			console.log('requestAds');
 			var deferred;
 

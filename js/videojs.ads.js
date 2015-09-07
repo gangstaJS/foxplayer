@@ -125,6 +125,7 @@ var
       // pause playback so ads can be handled.
       if (!player.paused()) {
         player.pause();
+        console.log('cancelContentPlay');
       }
 
       // add a contentplayback handler to resume playback when ads finish.
@@ -647,15 +648,15 @@ var
               },
               'adtimeout': function() {
                 this.state = 'content-resuming';
-                setImmediate(function() {
-                  player.trigger('ended');
-                });
+                // setImmediate(function() {
+                //   player.trigger('ended');
+                // });
               },
               'adserror': function() {
                 this.state = 'content-resuming';
-                setImmediate(function() {
-                  player.trigger('ended');
-                });
+                // setImmediate(function() {
+                //   player.trigger('ended');
+                // });
               }
             }
           },
