@@ -87,6 +87,14 @@
           player.pl._setVideoSource({src: player.pl.currentVideo.src, type: 'video/mp4'}/*, player.pl.currentVideo.attr('poster')*/);
         }
 
+        // --
+
+        if(index == (player.pl.itemsCount-1)) {
+          player.addClass('vjs-last-playing');
+        } else {
+          player.removeClass('vjs-last-playing');
+        }
+
         console.info('%c'+(player.tmpcounter++) + ' [' +  player.pl.currentVideo.title+']', 'color: #fff; background-color: green; font-size: 23px');
 
         player.pl._resumeVideo();

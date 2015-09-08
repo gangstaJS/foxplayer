@@ -6,7 +6,7 @@ var snapshotPrerolls = [];
 	var state = {}, 
 		settings = {}, 
 		player, 
-		predictionCount = 2, 
+		predictionCount = 5, 
 		$player,
 		$videoEl,
 	
@@ -52,9 +52,9 @@ var snapshotPrerolls = [];
     }); 
 
 		player.on('adstart', function() {
-      		this.volume(0.3);
-			tryPrepareNextVast();
-    	}); 
+    	this.volume(0.3);
+		  // tryPrepareNextVast();
+    }); 
 
 		player.on('contentupdate', requestAds);
 
@@ -98,8 +98,7 @@ var snapshotPrerolls = [];
   	destructAdsControls();
 
   	if(settings.pre.length) {
-  		player.trigger('adsnextroll');
-
+      tryPrepareNextVast();
   	} else {
   		createCookie('lastAds', getUnix());
     	settings.pre = snapshotPrerolls.slice();
@@ -128,6 +127,8 @@ var snapshotPrerolls = [];
 						state.hasNextVast = true;
 						state.nextVast = media;
 						predictionCount = 5;
+
+            player.trigger('adsnextroll');
 					}
 				}
 			});

@@ -76,6 +76,9 @@
               curTime = player.currentTime() - seekStep;
               // The flash player tech will allow you to seek into negative
               // numbers and break the seekbar, so try to prevent that.
+
+              if(player.ads.state == 'ad-playback') return;
+
               if (player.currentTime() <= seekStep) {
                 curTime = 0;
               }
@@ -83,6 +86,7 @@
               break;
             case 39: // Right Arrow
               event.preventDefault();
+              if(player.ads.state == 'ad-playback') return;
               player.currentTime(player.currentTime() + seekStep);
               break;
 
@@ -174,44 +178,28 @@
     player.on('keydown', keyDown);
     player.on('dblclick', doubleClick);
 
-    var lastTime = (new Date()).getTime(), timeout;
-
-    player.on(['mousewheel', 'DOMMouseScroll'], function(e) {
+    player.on(['mousewheel', 'DOMMouseScroll', 'MozMousePixelScroll'], function(e) {
       e.preventDefault();
       var curVol = player.volume();
 
       var delta = Math.max(-1, Math.min(1, (e.wheelDelta || -e.detail)));
 
-      if((e.timeStamp-lastTime) > 100) {
-        timeout = setTimeout(function() {
-          if(delta == 1) {
-              if(curVol < 1) {
-                if(player.muted()) player.muted(false);
-                curVol += 0.05;
-              }
-          } else if(delta == -1) {
-            if(curVol) {
-                curVol -= 0.05;
-              }
+      if(delta == 1) {
+          if(curVol < 1) {
+            if(player.muted()) player.muted(false);
+            curVol += 0.05;
           }
-
-          lastTime = (new Date()).getTime();
-
-          player.volume(curVol);
-
-          console.log(curVol);
-        }, 10);
-      } else {
-        clearTimeout(timeout);
+      } else if(delta == -1) {
+        if(curVol) {
+            curVol -= 0.05;
+          }
       }
 
-      
+      player.volume(curVol);
+
+      console.log(curVol);     
 
     });
-
-    // player.one('volumechange', function(e) {
-    //   curVol = player.volume();
-    // });
 
     return this;
   };

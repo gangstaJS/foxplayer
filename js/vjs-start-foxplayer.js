@@ -41,22 +41,54 @@ function initPlayer(node, conf, startIndex) {
 	
 	var playerInstance = videojs(node.get(0), {techOrder: conf.techOrder, inactivityTimeout: conf.inactivityTimeout, 'width': '780', 'height': '440'}).ready(function() {
 		// this.poster(conf.cover.url);
-		var me = this;
+		var me = this, pX, pY, pW, pH, $p;
 
 		me.storage = null;
 
-		setTimeout(function() {
-			$(me.el()).focus();
-		}, 500);
+		
 
-		if(window.localStorage) me.storage = window.localStorage;
+		// --
+
+		$p = $(this.el());
 
 		var $top_bar = $('<div>', {'class': 'vjs-top-bar'});
 		$top_bar.append('<span></span> <div><i class="vjs-collaps"></i><i class="vjs-close"></i><div>');
-		var $p = $(this.el());
 		$p.append($top_bar);
 
-		$p.resizable({minWidth: 455, minHeight: 225});
+
+		setTimeout(function() { $p.focus(); }, 0);
+
+		// --
+
+		if(window.localStorage) {
+			me.storage = window.localStorage;
+
+			pX = me.storage.getItem('pX');
+			pY = me.storage.getItem('pY');
+
+			pW = me.storage.getItem('pW');
+			pH = me.storage.getItem('pH');
+
+			pX = pX == null ? 100 : pX;
+			pY = pY == null ? 100 : pY;
+
+			// --
+
+			pW = me.storage.getItem('pW');
+			pH = me.storage.getItem('pH');
+
+			pW = pW == null ? 780 : pW;
+			pH = pH == null ? 440 : pH;
+
+			// --
+
+			$p.css({
+				top: pY+'px', 
+				left: pX+'px', 
+				width: pW+'px', 
+				height: pH+'px'
+			});
+		} 		
 
 
 		// при рпоигровании музыки пробрасываем через этот контейнер события на видеотег, так как его заслоняет постер;
@@ -98,6 +130,10 @@ function initPlayer(node, conf, startIndex) {
       		if(me.storage) {
       			me.storage.setItem('vol', me.volume());
       		}
+    	});
+
+    	me.on('fullscreenchange', function() {
+    		$p.resizable(me.isFullscreen() ? 'disable' : 'enable');
     	});
 
 		if(me.storage) {
@@ -180,6 +216,10 @@ function initPlayer(node, conf, startIndex) {
 			svgAnim.attr(playObj).get(0).beginElement();
 		});
 
+		me.on('setcontent', function() {
+
+		});
+
 		// ---
 
 		var down = false;		
@@ -212,19 +252,66 @@ function initPlayer(node, conf, startIndex) {
 		if(conf.adsOptions.pre && conf.adsOptions.pre.length) {
 			me.adsPreRolls(conf.adsOptions);
 		}
-		
 
+
+		$p.draggable({
+			handle: '.vjs-top-bar',
+			containment: "window",
+			stop: function(e,ui) {
+				if(me.storage) {
+					me.storage.setItem('pX', ui.position.left);
+					me.storage.setItem('pY', ui.position.top);
+				}
+			}
+		});	
+
+		$p.resizable({
+			minWidth: 455, 
+			minHeight: 225,
+
+			stop: function(e,ui) {
+				if(me.storage) {
+					me.storage.setItem('pW', $p.width());
+					me.storage.setItem('pH', $p.height());
+				}
+			}
+		});
 
 	});	// end player ready
 
-	var $player = $(playerInstance.el()).show();	
+	var $player = $(playerInstance.el()).show(), $win = $(window);	
 	$player.find('video').show();
 
+	$win.on('resize', function(event){
+		if($(event.target).hasClass('ui-resizable')) return;
 
-	$player.draggable({
-		handle: '.vjs-top-bar',
-		containment: "window"
+		var pW, pH, pX, pY, pos = $player.position(), setX, setY;
+
+		setX = pX;
+		setY = pY;
+
+		pW = $player.width();
+		pH = $player.height();
+
+		pX = pos.left;
+		pY = pos.top;
+
+		if((pX+pW) > $win.width()) {
+			setX = 20;
+			$player.css('left', setX+'px');
+		}
+
+		if((pY+pH) > $win.height()) {
+			setY = 20;
+			$player.css('top', setY+'px');
+		}
+
+		if(playerInstance.storage) {
+			playerInstance.storage.setItem('pX', setX);
+			playerInstance.storage.setItem('pY', setY);
+		}
 	});
+	
 
 	// playerInstance.userActive(true);
 

@@ -529,3 +529,11 @@ filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#40000000', e
 	top: 3px !important;
 	height: 13px !important;
 }
+
+.vjs-last-playing .vjs-next-btn {
+	opacity: .4 !important;
+}
+
+.vjs-last-playing .vjs-next-btn:hover:after {
+	color: #fff !important;
+}
