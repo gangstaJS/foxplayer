@@ -63,31 +63,31 @@ function initPlayer(node, conf, startIndex) {
 		if(window.localStorage) {
 			me.storage = window.localStorage;
 
-			pX = me.storage.getItem('pX');
-			pY = me.storage.getItem('pY');
+			// pX = me.storage.getItem('pX');
+			// pY = me.storage.getItem('pY');
 
-			pW = me.storage.getItem('pW');
-			pH = me.storage.getItem('pH');
+			// pW = me.storage.getItem('pW');
+			// pH = me.storage.getItem('pH');
 
-			pX = pX == null ? 100 : pX;
-			pY = pY == null ? 100 : pY;
+			// pX = pX == null ? 100 : pX;
+			// pY = pY == null ? 100 : pY;
 
-			// --
+			// // --
 
-			pW = me.storage.getItem('pW');
-			pH = me.storage.getItem('pH');
+			// pW = me.storage.getItem('pW');
+			// pH = me.storage.getItem('pH');
 
-			pW = pW == null ? 780 : pW;
-			pH = pH == null ? 440 : pH;
+			// pW = pW == null ? 780 : pW;
+			// pH = pH == null ? 440 : pH;
 
-			// --
+			// // --
 
-			$p.css({
-				top: pY+'px', 
-				left: pX+'px', 
-				width: pW+'px', 
-				height: pH+'px'
-			});
+			// $p.css({
+			// 	top: pY+'px', 
+			// 	left: pX+'px', 
+			// 	width: pW+'px', 
+			// 	height: pH+'px'
+			// });
 		} 		
 
 
@@ -150,8 +150,6 @@ function initPlayer(node, conf, startIndex) {
 		me.on('error', function() {
 			var err = me.error();
 
-			console.log('Error NOT ADS', err);
-
 			if(err && err.code == 4) {
 				$(me.el()).removeClass('vjs-error');
 				// if(me.ads && me.ads.state == 'content-playback') {
@@ -163,7 +161,7 @@ function initPlayer(node, conf, startIndex) {
 				// }
 				
 			} else {
-				console.warn(err);
+				if(me.ads.state !== 'ad-playback') console.warn(err);
 			}
 		});
 
@@ -282,35 +280,35 @@ function initPlayer(node, conf, startIndex) {
 	var $player = $(playerInstance.el()).show(), $win = $(window);	
 	$player.find('video').show();
 
-	$win.on('resize', function(event){
-		if($(event.target).hasClass('ui-resizable')) return;
+	// $win.on('resize', function(event){
+	// 	if($(event.target).hasClass('ui-resizable')) return;
 
-		var pW, pH, pX, pY, pos = $player.position(), setX, setY;
+	// 	var pW, pH, pX, pY, pos = $player.position(), setX, setY;
 
-		setX = pX;
-		setY = pY;
+	// 	setX = pX;
+	// 	setY = pY;
 
-		pW = $player.width();
-		pH = $player.height();
+	// 	pW = $player.width();
+	// 	pH = $player.height();
 
-		pX = pos.left;
-		pY = pos.top;
+	// 	pX = pos.left;
+	// 	pY = pos.top;
 
-		if((pX+pW) > $win.width()) {
-			setX = 20;
-			$player.css('left', setX+'px');
-		}
+	// 	if((pX+pW) > $win.width()) {
+	// 		setX = 20;
+	// 		$player.css('left', setX+'px');
+	// 	}
 
-		if((pY+pH) > $win.height()) {
-			setY = 20;
-			$player.css('top', setY+'px');
-		}
+	// 	if((pY+pH) > $win.height()) {
+	// 		setY = 20;
+	// 		$player.css('top', setY+'px');
+	// 	}
 
-		if(playerInstance.storage) {
-			playerInstance.storage.setItem('pX', setX);
-			playerInstance.storage.setItem('pY', setY);
-		}
-	});
+	// 	if(playerInstance.storage) {
+	// 		playerInstance.storage.setItem('pX', setX);
+	// 		playerInstance.storage.setItem('pY', setY);
+	// 	}
+	// });
 	
 
 	// playerInstance.userActive(true);

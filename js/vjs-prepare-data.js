@@ -41,14 +41,57 @@ var snapshotPrerolls = [];
 			}
 		});
 
+    state.addErrors = 0;
+
     player.on('aderror', function() {
       var err = player.error();
 
       player.trigger('AdError');
 
-      console.log(err);
+      // sendCustomStat({id: state.rollId, e: 'err', r: 0});
 
-      adcanceled();
+      if(err && (state.addErrors < 15)) {
+        player.src(player.currentSrc());
+        
+        state.addErrors++;
+
+        console.log('Try restore ads playback');
+      } else {
+        state.addErrors = 0;
+        sendCustomStat({id: state.rollId, e: 'err', r: 0});
+        adcanceled();
+      }
+
+      // var trys = 15;
+
+      // for(var i = 0; i<trys; i++) {
+
+      //   !function(p) {
+      //     setTimeout(function() {
+      //       var err = p.error();
+
+      //       if(err && err.code) {
+      //         p.src(p.currentSrc());
+      //         console.log('Try restore ads playback');
+      //       }
+      //     }, 50);
+
+      //   }(player);
+        
+      // }
+
+      // setTimeout(function() {
+      //   var err = p.error();
+
+      //   if(err && err.code) {
+      //     adcanceled();
+      //   }
+        
+      // }, 800);
+
+
+
+      // adcanceled();
     }); 
 
 		player.on('adstart', function() {
@@ -122,12 +165,13 @@ var snapshotPrerolls = [];
 						predictionCount--;						
 						state.hasNextVast = false;
 						console.log('again try vast');
+            sendCustomStat({id: 2, e: 'load', r: 1});
 						tryPrepareNextVast();
 					} else {
 						state.hasNextVast = true;
 						state.nextVast = media;
 						predictionCount = 5;
-
+            sendCustomStat({id: 2, e: 'load', r: 0});
             player.trigger('adsnextroll');
 					}
 				}
@@ -159,12 +203,16 @@ var snapshotPrerolls = [];
 				});
 				// player.trigger('adsready');
 				setTimeout(player.trigger.bind(player, 'adsready'), 200);
+        state.rollId = 2;
 			} else {
 				state.curAdInitData = settings.pre.shift();
 				deferred = vastRequest(state.curAdInitData.url);
 
+        state.rollId = 1;
+
 				$.when(deferred).done(function(res) {
 					state.adsMedia = parseVast(res);
+          sendCustomStat({id: 1, e: 'load', r: 0});
 					player.trigger('adsready');
 				});
 			}
@@ -192,6 +240,8 @@ var snapshotPrerolls = [];
         player.trigger('AdImpression');
         player.trigger('AdCreativeView');
         player.trigger('AdStart');
+
+        sendCustomStat({id: state.rollId, e: 'start', r: 0});
 
         state.adPlaying = true;
 
@@ -278,138 +328,154 @@ var snapshotPrerolls = [];
 	// --
 
 
-    function initAdsControls() {
-      try {
-        skipBtnEl = $('<div>', {'class': 'vjs-ads-skip-btn vjs-ads-auto-create'});
-        skipBtnEl.text('Пропустить>>');      
-        player.el().appendChild(skipBtnEl.get(0));
+  function initAdsControls() {
+    try {
+      skipBtnEl = $('<div>', {'class': 'vjs-ads-skip-btn vjs-ads-auto-create'});
+      skipBtnEl.text('Пропустить>>');      
+      player.el().appendChild(skipBtnEl.get(0));
 
-        addClickLayerEl = $('<div>', {'class': 'vjs-ads-click-layer vjs-ads-auto-create'});
-        player.el().appendChild(addClickLayerEl.get(0));
-      } catch(e) { 
-        console.warn('skipBtnEl', skipBtnEl);
-        console.warn('addClickLayerEl', addClickLayerEl);
-        console.warn(e.message); 
-      }      
+      addClickLayerEl = $('<div>', {'class': 'vjs-ads-click-layer vjs-ads-auto-create'});
+      player.el().appendChild(addClickLayerEl.get(0));
+    } catch(e) { 
+      console.warn('skipBtnEl', skipBtnEl);
+      console.warn('addClickLayerEl', addClickLayerEl);
+      console.warn(e.message); 
+    }      
 
-    	state.adsMedia.vastExtensions.skipTime = convertToSeconds(state.adsMedia.vastExtensions.skipTime);
-    	if(state.adsMedia.vastExtensions.skipButton) { // проверяем разрешен ли скип рекламы.
-    		if(state.adsMedia.vastExtensions.skipTime <= 0) { // показать скип кнопку сразу
-          skipBtnEl.css('display', 'block');
-    		} else {
-    			player.on('timeupdate', checkSkip);
-    		}
-
-
-    		player.on(skipBtnEl.get(0), 'click', skipAds);
-
-    	} else {
-    		console.info('Skip button disable');
-    	}
-
-
-    	// проверяем кликабельный ли видео элемент рекламы
-    	if(state.adsMedia.vastExtensions.isClickable) {
-    		addClickLayerEl.html(state.adsMedia.vastExtensions.linkTxt);
-    		player.on(addClickLayerEl.get(0), 'click', clickThrough);
-    	} else {
-    		console.info('isClickable disable');
-    	}
-
-    	player.on('timeupdate', checkTimes);
-
-
-    	// --
-    	
-    }
-
-    // --
-
-    function destructAdsControls() {
-    	try {
-    		player.off(addClickLayerEl.get(0), 'click', clickThrough);
-
-        $('.vjs-ads-auto-create').remove();
-
-    		player.off('timeupdate', checkSkip);  
-    		player.off('timeupdate', checkTimes);    		
-
-    	} catch(e) { console.log(e.message); }
-    }
-
-    // --
-
-    function checkTimes() {
-    	var dur = player.duration(),
-    		curTime = this.currentTime(),
-    		firstQuartile = dur/4,
-    		midpoint      = dur/2,
-    		thirdQuartile = dur/3;
-
-
-    	if((curTime >= firstQuartile) && state.firstQuartile) {
-    		state.firstQuartile = false;
-    		player.trigger('AdFirstQuartile');
-    	}
-
-    	if((curTime >= midpoint) && state.midpoint) {
-    		state.midpoint = false;
-    		player.trigger('AdMidpoint');
-    	}
-
-    	if((curTime >= thirdQuartile) && state.thirdQuartile) {
-    		state.thirdQuartile = false;
-    		player.trigger('AdThirdQuartile');
-    	}
-    }
-
-    // --
-
-    function checkSkip() {
-    	if(this.currentTime() >= state.adsMedia.vastExtensions.skipTime)
+  	state.adsMedia.vastExtensions.skipTime = convertToSeconds(state.adsMedia.vastExtensions.skipTime);
+  	if(state.adsMedia.vastExtensions.skipButton) { // проверяем разрешен ли скип рекламы.
+  		if(state.adsMedia.vastExtensions.skipTime <= 0) { // показать скип кнопку сразу
         skipBtnEl.css('display', 'block');
-    }
+  		} else {
+  			player.on('timeupdate', checkSkip);
+  		}
 
 
-      // --
+  		player.on(skipBtnEl.get(0), 'click', skipAds);
 
-      function skipAds() {
-      	skipBtnEl.remove();
-      	player.off('timeupdate', checkSkip);
-      	player.trigger('AdSkiped');
-      	player.trigger('adcanceled');
-      	
+  	} else {
+  		console.info('Skip button disable');
+  	}
+
+
+  	// проверяем кликабельный ли видео элемент рекламы
+  	if(state.adsMedia.vastExtensions.isClickable) {
+  		addClickLayerEl.html(state.adsMedia.vastExtensions.linkTxt);
+  		player.on(addClickLayerEl.get(0), 'click', clickThrough);
+  	} else {
+  		console.info('isClickable disable');
+  	}
+
+  	player.on('timeupdate', checkTimes);
+
+
+  	// --
+  	
+  }
+
+  // --
+
+  function destructAdsControls() {
+  	try {
+  		player.off(addClickLayerEl.get(0), 'click', clickThrough);
+
+      $('.vjs-ads-auto-create').remove();
+
+  		player.off('timeupdate', checkSkip);  
+  		player.off('timeupdate', checkTimes);    		
+
+  	} catch(e) { console.log(e.message); }
+  }
+
+  // --
+
+  function checkTimes() {
+  	var dur = player.duration(),
+  		curTime = this.currentTime(),
+  		firstQuartile = dur/4,
+  		midpoint      = dur/2,
+  		thirdQuartile = dur/3;
+
+
+  	if((curTime >= firstQuartile) && state.firstQuartile) {
+  		state.firstQuartile = false;
+  		player.trigger('AdFirstQuartile');
+  	}
+
+  	if((curTime >= midpoint) && state.midpoint) {
+  		state.midpoint = false;
+  		player.trigger('AdMidpoint');
+  	}
+
+  	if((curTime >= thirdQuartile) && state.thirdQuartile) {
+  		state.thirdQuartile = false;
+  		player.trigger('AdThirdQuartile');
+  	}
+  }
+
+  // --
+
+  function checkSkip() {
+  	if(this.currentTime() >= state.adsMedia.vastExtensions.skipTime)
+      skipBtnEl.css('display', 'block');
+  }
+
+
+  // --
+
+  function skipAds() {
+  	skipBtnEl.remove();
+  	player.off('timeupdate', checkSkip);
+  	player.trigger('AdSkiped');
+  	player.trigger('adcanceled');
+  	
+  }
+
+  function clickThrough() {
+  	player.trigger('AdClickThrough');
+  }
+
+  // --
+
+  function convertToSeconds(time) {
+  	var seconds = 0;
+  	if(time) {
+  		if(isFinite(time)) return parseInt(time);
+
+  		var timesArr = time.split(':');
+  		if(timesArr.length) {
+  			if(timesArr.length == 2) {
+  				// 00:00
+  				seconds = parseInt(timesArr[0])*60+parseInt(timesArr[1]);
+  			} else if(timesArr.length >= 3) {
+  				// 00:00:00
+  				seconds = (parseInt(timesArr[0])*3600)+(parseInt(timesArr[1])*60)+parseInt(timesArr[2]);
+  			}
+  		}
+  	}
+
+  	return seconds;
+  }
+
+  // --
+
+  function getUnix() {
+  	return Math.floor((new Date()).getTime()/1000);
+  }
+
+  // --
+
+  function sendCustomStat(params) {
+    $.ajax({
+      url: 'http://37.139.22.225:8007/stat',
+      type: 'POST',
+      dataType: 'text',
+      data: params,
+      success: function(res) {
+        console.log('Custom stat', res);
       }
-
-      function clickThrough() {
-      	player.trigger('AdClickThrough');
-      }
-
-      // --
-
-      function convertToSeconds(time) {
-      	var seconds = 0;
-      	if(time) {
-      		if(isFinite(time)) return parseInt(time);
-
-      		var timesArr = time.split(':');
-      		if(timesArr.length) {
-      			if(timesArr.length == 2) {
-      				// 00:00
-      				seconds = parseInt(timesArr[0])*60+parseInt(timesArr[1]);
-      			} else if(timesArr.length >= 3) {
-      				// 00:00:00
-      				seconds = (parseInt(timesArr[0])*3600)+(parseInt(timesArr[1])*60)+parseInt(timesArr[2]);
-      			}
-      		}
-      	}
-
-      	return seconds;
-      }
-
-      function getUnix() {
-      	return Math.floor((new Date()).getTime()/1000);
-      }
+    });
+  }
 
 
 	vjs.plugin('adsPreRolls', adsPreRolls);
