@@ -39,8 +39,10 @@ function initPlayer(node, conf, startIndex) {
 
 	conf.inactivityTimeout = 500;
 	
-	var playerInstance = videojs(node.get(0), {techOrder: conf.techOrder, inactivityTimeout: conf.inactivityTimeout, 'width': '780', 'height': '440'}).ready(function() {
+	var playerInstance = videojs(node.get(0), {techOrder: conf.techOrder, inactivityTimeout: conf.inactivityTimeout, 'width': '720', 'height': '500'}).ready(function() {
 		// this.poster(conf.cover.url);
+
+		// width: 720px; height: 526px;
 		var me = this, pX, pY, pW, pH, $p;
 
 		me.storage = null;

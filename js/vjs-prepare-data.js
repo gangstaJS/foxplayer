@@ -1,4 +1,4 @@
-var snapshotPrerolls = [];
+var snapshotPrerolls = [], unit;
 
 !function(window, document, vjs, undefined) {
 	"use strict";
@@ -6,7 +6,7 @@ var snapshotPrerolls = [];
 	var state = {}, 
 		settings = {}, 
 		player, 
-		predictionCount = 5, 
+		predictionCount = 3, 
 		$player,
 		$videoEl,
 	
@@ -44,9 +44,7 @@ var snapshotPrerolls = [];
     state.addErrors = 0;
 
     player.on('aderror', function() {
-      var err = player.error();
-
-      player.trigger('AdError');
+      var err = player.error();      
 
       // sendCustomStat({id: state.rollId, e: 'err', r: 0});
 
@@ -57,41 +55,12 @@ var snapshotPrerolls = [];
 
         console.log('Try restore ads playback');
       } else {
+        player.trigger('AdError');
         state.addErrors = 0;
         sendCustomStat({id: state.rollId, e: 'err', r: 0});
         adcanceled();
       }
 
-      // var trys = 15;
-
-      // for(var i = 0; i<trys; i++) {
-
-      //   !function(p) {
-      //     setTimeout(function() {
-      //       var err = p.error();
-
-      //       if(err && err.code) {
-      //         p.src(p.currentSrc());
-      //         console.log('Try restore ads playback');
-      //       }
-      //     }, 50);
-
-      //   }(player);
-        
-      // }
-
-      // setTimeout(function() {
-      //   var err = p.error();
-
-      //   if(err && err.code) {
-      //     adcanceled();
-      //   }
-        
-      // }, 800);
-
-
-
-      // adcanceled();
     }); 
 
 		player.on('adstart', function() {
@@ -110,7 +79,12 @@ var snapshotPrerolls = [];
     	player.on('readyforpreroll', function() { 		
     		if (!state.prerollPlayed) {
         		state.prerollPlayed = true;
-       			playAd();
+        		if(state.adsMedia.apiFramework == 'VPAID') {
+        			playVPAIDAd();
+        		} else {
+        			playAd();
+        		}
+       			
       		}
     	});	
 
@@ -155,27 +129,50 @@ var snapshotPrerolls = [];
   }
 
 	function tryPrepareNextVast() {
-		if(settings.pre.length && predictionCount) {
-			var deferred = vastRequest(settings.pre[0].url);
+		if(settings.pre.length && (predictionCount > 0)) {
+			var deferred = parseFullVAST(settings.pre[0].url);//vastRequest(settings.pre[0].url);
 
-			deferred.done(function(res) {
-				var media = parseVast(res);
-				if(state.adsMedia) {
-					if(media.src == state.adsMedia.src) {
+
+
+			deferred.then(function(res) {
+        // var xml = res;
+        console.log(res);
+				var media = res;//parseVast(res);
+        // var xml = '';
+
+				// if(state.adsMedia) {
+          // try {
+          //   xml = new XMLSerializer().serializeToString(res);
+          //   console.log(xml);
+          // } catch (e) {
+          //   console.log(e.message);
+          // }
+
+          // console.log(media.src);
+          // console.log(state.adsMedia.src);
+
+					if((media.src == state.adsMedia.src) || !media.src) {
 						predictionCount--;						
 						state.hasNextVast = false;
 						console.log('again try vast');
-            sendCustomStat({id: 2, e: 'load', r: 1});
+
+            sendCustomStat({id: 2, e: 'load', r: 1, src1: media.src, pc: predictionCount + '@' + state.adsMedia.src, src2: state.adsMedia.src});
 						tryPrepareNextVast();
-					} else {
+					} else if(media.src || media.src.length) {
 						state.hasNextVast = true;
 						state.nextVast = media;
-						predictionCount = 5;
+						predictionCount = 3;
             sendCustomStat({id: 2, e: 'load', r: 0});
             player.trigger('adsnextroll');
-					}
-				}
+					} else {
+            state.hasNextVast = false;
+          }
+				// }
 			});
+
+      console.log('predictionCount', predictionCount);
+		} else if(predictionCount <= 0) {
+			createCookie('lastAds', getUnix());
 		}
 	}
 
@@ -206,12 +203,15 @@ var snapshotPrerolls = [];
         state.rollId = 2;
 			} else {
 				state.curAdInitData = settings.pre.shift();
-				deferred = vastRequest(state.curAdInitData.url);
+				// deferred = vastRequest(state.curAdInitData.url);
+
+				deferred = parseFullVAST(state.curAdInitData.url)
 
         state.rollId = 1;
 
-				$.when(deferred).done(function(res) {
-					state.adsMedia = parseVast(res);
+				deferred.then(function(res) {
+					console.log(res);
+					state.adsMedia = res;
           sendCustomStat({id: 1, e: 'load', r: 0});
 					player.trigger('adsready');
 				});
@@ -226,92 +226,267 @@ var snapshotPrerolls = [];
 
 	function playAd() {
 
-        // short-circuit if we don't have any ad inventory to play
-        if (!state.adsMedia || state.adsMedia.length === 0) {
-          return;
-        }
+ 		// short-circuit if we don't have any ad inventory to play
+ 		if (!state.adsMedia || state.adsMedia.length === 0) {
+ 		  return;
+ 		}
 
-        // tell ads plugin we're ready to play our ad
-        player.ads.startLinearAdMode();
+ 		// tell ads plugin we're ready to play our ad
+ 		player.ads.startLinearAdMode();
 
-        state.firstQuartile = state.midpoint = state.thirdQuartile = true;
+ 		state.firstQuartile = state.midpoint = state.thirdQuartile = true;
 
-        player.adsvast.startTrecking(state.adsMedia);
-        player.trigger('AdImpression');
-        player.trigger('AdCreativeView');
-        player.trigger('AdStart');
+ 		player.adsvast.startTrecking(state.adsMedia);
+ 		
 
-        sendCustomStat({id: state.rollId, e: 'start', r: 0});
+ 		sendCustomStat({id: state.rollId, e: 'start', r: 0});
 
-        state.adPlaying = true;
+ 		state.adPlaying = true;
 
 
 
-        setTimeout(player.pl._setVideoSource.bind(player, {type: state.adsMedia.type, src: state.adsMedia.src}), 1);
-        // player.pl._setVideoSource({type: state.adsMedia.type, src: state.adsMedia.src});
-        
-        player.one('adloadstart', function() {
-          initAdsControls();
-        });
-        
-        player.one('adended', function() {
-        	player.trigger('AdComplete');
-        	adcanceled();
-        });
+ 		setTimeout(player.pl._setVideoSource.bind(player, {type: state.adsMedia.type, src: state.adsMedia.src}), 1);
+ 		// player.pl._setVideoSource({type: state.adsMedia.type, src: state.adsMedia.src});
+ 		
+ 		player.one('adloadstart', function() {
+ 			player.trigger('AdImpression');
+ 			player.trigger('AdCreativeView');
+ 			player.trigger('AdStart');
+ 		  
+ 		  initAdsControls();
+ 		});
+ 		
+ 		player.one('adended', function() {
+ 			player.trigger('AdComplete');
+ 			adcanceled();
+ 		});
 
-        // player.one('adended', function() {
-        //   player.ads.endLinearAdMode();
+ 		// player.one('adended', function() {
+ 		//   player.ads.endLinearAdMode();
 
-        //   player.adsvast.endTrecking();
+ 		//   player.adsvast.endTrecking();
 
-        //   this.pause();
-        //   state.adPlaying = false;
-        //   state.prerollPlayed = false;
-        //   destructAdsControls();
+ 		//   this.pause();
+ 		//   state.adPlaying = false;
+ 		//   state.prerollPlayed = false;
+ 		//   destructAdsControls();
 
-        //   if(settings.pre.length) {
-        //   	console.info('adsnextroll');
-        //   	player.trigger('adsnextroll');
-        //   } else {
-        //   	createCookie('lastAds', getUnix());
-        //   	settings.pre = snapshotPrerolls.slice();
-        //   	this.play();
-        //   }
-        // });
+ 		//   if(settings.pre.length) {
+ 		//   	console.info('adsnextroll');
+ 		//   	player.trigger('adsnextroll');
+ 		//   } else {
+ 		//   	createCookie('lastAds', getUnix());
+ 		//   	settings.pre = snapshotPrerolls.slice();
+ 		//   	this.play();
+ 		//   }
+ 		// });
 
-      }
+  }
+
+  function playVPAIDAd() {
+  	// short-circuit if we don't have any ad inventory to play
+ 		if (!state.adsMedia || state.adsMedia.length === 0) {
+ 		  return;
+ 		}
+
+ 		// tell ads plugin we're ready to play our ad
+ 		player.ads.startLinearAdMode();
+
+ 		state.firstQuartile = state.midpoint = state.thirdQuartile = true;
+
+ 		player.adsvast.startTrecking(state.adsMedia);
+ 		
+
+ 		sendCustomStat({id: state.rollId, e: 'start', r: 0});
+
+ 		state.adPlaying = true;
+
+ 		// $player.css({width: (state.adsMedia.width || 700)+'px', height: (state.adsMedia.height || 400)+'px' });
+
+		state.flashVPaid = new VPAIDFLASHClient(state.$VPAIDContainer.get(0), flashVPAIDWrapperLoaded);
+ 		
+  }
 
 	// --
 
 	function vastRequest(vastURL) {
     console.log('vastURL >>>', vastURL);
-		return $.ajax({url: vastURL, dataType: 'xml'});
+		return $.ajax({
+			url: vastURL, 
+			dataType: 'xml',
+			xhrFields: {
+         withCredentials: false
+    	}
+		});
 	}
 
 	// --
 
-	function parseVast(xml) {
-		var $vast = $(xml);
-		var $mediaFiles = $vast.find('MediaFiles MediaFile');
 
-		if($mediaFiles.length) {
-			var data = {
-				vastExtensions: getVastDataBlock($vast.find('Extensions Extension'), 'type'),
-				vastEvents: getVastDataBlock($vast.find('TrackingEvents Tracking'), 'event'),
-				vastClickThrough: $vast.find('VideoClicks ClickThrough').text(),
-				vastImpression: $vast.find('Impression').text(),
-        playerError: $vast.find('Error').text(),
-				type: $mediaFiles.eq(0).attr('type'), 
-				src: $mediaFiles.eq(0).text()
-			};
+	function parseFullVAST(url) {
+		var defer = $.Deferred();
 
-			console.log(data);
+		vastRequest(url).promise().then(function(xml) {
+			var $vast = $(xml), VASTAdTagURI = '', defferd, data;
 
-			return data;
+			var hasWrapper = $vast.find('Ad Wrapper').length ? 1 : 0; 
+	
+			if(hasWrapper) {
+				var VASTAdTagURI = $vast.find('Ad Wrapper VASTAdTagURI').text();
+	
+				vastRequest(VASTAdTagURI).promise().then(function(vastXml) {
+					var $vastInWrapper = $(vastXml);
+					var $mediaFiles = $vastInWrapper.find('MediaFiles MediaFile');
+	
+					state.$VPAIDContainer = $player.find('#vjs-vpaid-container');
+					if(!state.$VPAIDContainer.length) {
+						state.$VPAIDContainer = $('<div>', {id: 'vjs-vpaid-container'});
+						$player.append(state.$VPAIDContainer);
+					}
+	
+					data = {
+						vastExtensions: getVastDataBlock($vast.find('Extensions Extension'), 'type'),
+						vastEvents: getVastDataBlock($vast.find('TrackingEvents Tracking'), 'event'),
+						vastClickThrough: $vast.find('VideoClicks ClickThrough').text(),
+						vastImpression: $vast.find('Impression').text(),
+    		    playerError: $vast.find('Error').text(),
+						type: $mediaFiles.eq(0).attr('type'), 
+						src: $mediaFiles.eq(0).text(),
+						apiFramework: $mediaFiles.eq(0).attr('apiFramework'), 
+						width: $mediaFiles.eq(0).attr('width'),
+						height: $mediaFiles.eq(0).attr('height')
+					};
+
+					console.log(data);
+	
+					defer.resolve(data);       
+	
+				});
+	
+	
+			} else {
+
+
+	
+				var $mediaFiles = $vast.find('MediaFiles MediaFile');
+		
+				if($mediaFiles.length) {
+					data = {
+						vastExtensions: getVastDataBlock($vast.find('Extensions Extension'), 'type'),
+						vastEvents: getVastDataBlock($vast.find('TrackingEvents Tracking'), 'event'),
+						vastClickThrough: $vast.find('VideoClicks ClickThrough').text(),
+						vastImpression: $vast.find('Impression').text(),
+    		    playerError: $vast.find('Error').text(),
+						type: $mediaFiles.eq(0).attr('type'), 
+						src: $mediaFiles.eq(0).text(),
+						apiFramework: $mediaFiles.eq(0).attr('apiFramework'),
+						width: $mediaFiles.eq(0).attr('width'),
+						height: $mediaFiles.eq(0).attr('height')
+					};
+		
+					
+					defer.resolve(data);
+				}
+
 				
-		}
-		return undefined;		
+
+			}
+
+		});
+
+		return defer.promise();
+
 	}
+
+	function flashVPAIDWrapperLoaded(err, success) {
+  	if(err) return;
+
+  	var adURL = state.adsMedia.src.trim();
+
+  	console.log(adURL);
+
+  	state.flashVPaid.loadAdUnit(adURL, function (error, adUnit) {
+    	if (error) return;
+    	unit = adUnit;
+
+    	adUnit.handshakeVersion('2.0', initAd);
+    	adUnit.on('AdLoaded', startAd);
+
+    	adUnit.on('AdStarted', function (err, result) {
+ 					player.trigger('AdCreativeView');
+    	});
+
+    	adUnit.on('AdImpression', function (err, result) {
+    	   player.trigger('AdImpression');
+    	});
+
+    	adUnit.on('AdVideoStart', function (err, result) {
+    	   player.trigger('AdStart');
+    	});
+
+    	adUnit.on('AdVideoComplete', function (err, result) {
+    	   player.trigger('AdComplete');
+    	   adcanceled();
+    	});
+
+    	adUnit.on('AdUserClose', function (err, result) {
+    	   player.trigger('AdSkiped');
+    	   adcanceled();
+    	});
+
+    	
+
+    	// adUnit.on('AdStopped', function (err, result) {
+    	//     player.trigger('AdComplete');
+ 				// 	adcanceled();
+    	// });
+
+
+    	
+
+
+
+    	
+
+    	console.log('adUnitLoaded');
+
+    	function initAd(err, result) {
+    	    console.log('handShake', err, result);
+    	    adUnit.initAd(1000, 800, 'normal', -1, '', '', function (err) {
+    	        console.log('initAd', err);
+
+    	        adUnit.pauseAd();
+    	    });
+
+    	    // adUnit.resizeAd(1000, 800, 'normal', function (err) {
+    	    //     console.log('resizeAd', err);
+    	    // });
+    	}
+
+    	function startAd(err, result) {
+    	    adUnit.startAd(function (err, result) {
+
+    	    });
+    	}
+
+    	function checkAdProperties() {
+    	    adUnit.getAdIcons(function (err, result) {
+    	        console.log('getAdIcons', result);
+    	    });
+    	    adUnit.setAdVolume(10, function (err, result) {
+    	        console.log('setAdVolume', result);
+    	    });
+    	    adUnit.getAdVolume(function (err, result) {
+    	        console.log('getAdVolume', result);
+    	    });
+    	}
+
+    });
+
+
+  	// --
+
+  }
 
 	// --
 
