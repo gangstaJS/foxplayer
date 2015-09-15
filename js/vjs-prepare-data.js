@@ -14,7 +14,7 @@ var snapshotPrerolls = [], unit;
 		skipBtnEl,
 		addClickLayerEl;
 
-    console.log('Changes set');
+  console.log('Changes set');
 
 	function adsPreRolls(options) {
 		player = this;
@@ -59,6 +59,7 @@ var snapshotPrerolls = [], unit;
         state.addErrors = 0;
         sendCustomStat({id: state.rollId, e: 'err', r: 0});
         adcanceled();
+        console.log('AdError');
       }
 
     }); 
@@ -106,7 +107,7 @@ var snapshotPrerolls = [], unit;
 
 
 	function adcanceled() {				
-  	player.ads.endLinearAdMode();
+  	
   	player.adsvast.endTrecking();
 
   	// player.pause();
@@ -117,11 +118,13 @@ var snapshotPrerolls = [], unit;
   	if(settings.pre.length) {
       tryPrepareNextVast();
   	} else {
+  		player.ads.endLinearAdMode();
   		createCookie('lastAds', getUnix());
     	settings.pre = snapshotPrerolls.slice();
-  		player.play();
   	}
     player.play();
+
+    console.log('adcanceled');
   }
 
   function adStop() {
@@ -156,7 +159,7 @@ var snapshotPrerolls = [], unit;
 						state.hasNextVast = false;
 						console.log('again try vast');
 
-            sendCustomStat({id: 2, e: 'load', r: 1, src1: media.src, pc: predictionCount + '@' + state.adsMedia.src, src2: state.adsMedia.src});
+            sendCustomStat({id: 2, e: 'load', r: 1, src1: media.src + '@' + state.adsMedia.src, pc: predictionCount, src2: state.adsMedia.src});
 						tryPrepareNextVast();
 					} else if(media.src || media.src.length) {
 						state.hasNextVast = true;
@@ -171,7 +174,9 @@ var snapshotPrerolls = [], unit;
 			});
 
       console.log('predictionCount', predictionCount);
-		} else if(predictionCount <= 0) {
+		} else {
+			settings.pre.shift();
+			adcanceled();
 			createCookie('lastAds', getUnix());
 		}
 	}
@@ -195,12 +200,21 @@ var snapshotPrerolls = [], unit;
 				settings.pre = [];
 				state.adsMedia = state.nextVast;
 				state.hasNextVast = false;
-				player.one('playing', function() {
-					player.trigger('adsready');
-				});
+				// player.one('playing', function() {
+				// 	player.trigger('adsready');
+				// });
 				// player.trigger('adsready');
-				setTimeout(player.trigger.bind(player, 'adsready'), 200);
+				// setTimeout(player.trigger.bind(player, 'adsready'), 200);
         state.rollId = 2;
+
+
+        state.prerollPlayed = true;
+        if(state.adsMedia.apiFramework == 'VPAID') {
+        	playVPAIDAd();
+        } else {
+        	playAd();
+        }
+
 			} else {
 				state.curAdInitData = settings.pre.shift();
 				// deferred = vastRequest(state.curAdInitData.url);
@@ -233,6 +247,7 @@ var snapshotPrerolls = [], unit;
 
  		// tell ads plugin we're ready to play our ad
  		player.ads.startLinearAdMode();
+ 		console.log('layer.ads.startLinearAdMode();');
 
  		state.firstQuartile = state.midpoint = state.thirdQuartile = true;
 
@@ -245,13 +260,14 @@ var snapshotPrerolls = [], unit;
 
 
 
- 		setTimeout(player.pl._setVideoSource.bind(player, {type: state.adsMedia.type, src: state.adsMedia.src}), 1);
- 		// player.pl._setVideoSource({type: state.adsMedia.type, src: state.adsMedia.src});
+ 		// setTimeout(player.pl._setVideoSource.bind(player, {type: state.adsMedia.type, src: state.adsMedia.src}), 1);
+ 		player.pl._setVideoSource({type: state.adsMedia.type, src: state.adsMedia.src});
  		
- 		player.one('adloadstart', function() {
+ 		player.one('adloadedmetadata', function() {
  			player.trigger('AdImpression');
  			player.trigger('AdCreativeView');
  			player.trigger('AdStart');
+ 			player.removeClass('vjs-seeking');
  		  
  		  initAdsControls();
  		});
@@ -301,7 +317,7 @@ var snapshotPrerolls = [], unit;
 
  		state.adPlaying = true;
 
- 		// $player.css({width: (state.adsMedia.width || 700)+'px', height: (state.adsMedia.height || 400)+'px' });
+ 		//$player.css({width: (state.adsMedia.width || 780) + 'px', height: (state.adsMedia.height || 440)+'px'}/*, top: '300px', left: '200px' }*/);
 
 		state.flashVPaid = new VPAIDFLASHClient(state.$VPAIDContainer.get(0), flashVPAIDWrapperLoaded);
  		
@@ -309,14 +325,16 @@ var snapshotPrerolls = [], unit;
 
 	// --
 
-	function vastRequest(vastURL) {
+	function vastRequest(vastURL, xhrFields) {
+		if(xhrFields == undefined) {
+			xhrFields = {withCredentials: true};
+		}
+
     console.log('vastURL >>>', vastURL);
 		return $.ajax({
 			url: vastURL, 
 			dataType: 'xml',
-			xhrFields: {
-         withCredentials: false
-    	}
+			xhrFields: xhrFields
 		});
 	}
 
@@ -334,39 +352,75 @@ var snapshotPrerolls = [], unit;
 			if(hasWrapper) {
 				var VASTAdTagURI = $vast.find('Ad Wrapper VASTAdTagURI').text();
 	
-				vastRequest(VASTAdTagURI).promise().then(function(vastXml) {
+				vastRequest(VASTAdTagURI, {withCredentials: false}).promise().then(function(vastXml) {
 					var $vastInWrapper = $(vastXml);
-					var $mediaFiles = $vastInWrapper.find('MediaFiles MediaFile');
-	
-					state.$VPAIDContainer = $player.find('#vjs-vpaid-container');
-					if(!state.$VPAIDContainer.length) {
-						state.$VPAIDContainer = $('<div>', {id: 'vjs-vpaid-container'});
-						$player.append(state.$VPAIDContainer);
-					}
-	
-					data = {
-						vastExtensions: getVastDataBlock($vast.find('Extensions Extension'), 'type'),
-						vastEvents: getVastDataBlock($vast.find('TrackingEvents Tracking'), 'event'),
-						vastClickThrough: $vast.find('VideoClicks ClickThrough').text(),
-						vastImpression: $vast.find('Impression').text(),
-    		    playerError: $vast.find('Error').text(),
-						type: $mediaFiles.eq(0).attr('type'), 
-						src: $mediaFiles.eq(0).text(),
-						apiFramework: $mediaFiles.eq(0).attr('apiFramework'), 
-						width: $mediaFiles.eq(0).attr('width'),
-						height: $mediaFiles.eq(0).attr('height')
-					};
+					var hasWrapperSecond = $vastInWrapper.find('Ad Wrapper').length ? 1 : 0;
 
-					console.log(data);
+					if(hasWrapperSecond) {
+						var VASTAdTagURISecond = $vastInWrapper.find('Ad Wrapper VASTAdTagURI').text();
+
+						vastRequest(VASTAdTagURISecond, {withCredentials: false}).promise().then(function(vastXml) {
+								var $vastInWrapperSecond = $(vastXml);
+
+								var $mediaFiles = $vastInWrapperSecond.find('MediaFiles MediaFile');
+
+
+								state.$VPAIDContainer = $player.find('#vjs-vpaid-container');
+								if(!state.$VPAIDContainer.length) {
+									state.$VPAIDContainer = $('<div>', {id: 'vjs-vpaid-container'});
+									$player.append(state.$VPAIDContainer);
+								}
+				
+								data = {
+									vastExtensions: getVastDataBlock($vast.find('Extensions Extension'), 'type'),
+									vastEvents: getVastDataBlock($vast.find('TrackingEvents Tracking'), 'event'),
+									vastClickThrough: $vast.find('VideoClicks ClickTracking').text(),
+									vastImpression: $vast.find('Impression').text(),
+    		  			  playerError: $vast.find('Error').text(),
+									type: $mediaFiles.eq(0).attr('type'), 
+									src: $mediaFiles.eq(0).text(),
+									apiFramework: $mediaFiles.eq(0).attr('apiFramework'), 
+									width: $mediaFiles.eq(0).attr('width'),
+									height: $mediaFiles.eq(0).attr('height')
+								};
+
+								console.log(data);		
+								defer.resolve(data);
+		
+						});
+					} else {
+
+						var $mediaFiles = $vastInWrapper.find('MediaFiles MediaFile');
+		
+						state.$VPAIDContainer = $player.find('#vjs-vpaid-container');
+						if(!state.$VPAIDContainer.length) {
+							state.$VPAIDContainer = $('<div>', {id: 'vjs-vpaid-container'});
+							$player.append(state.$VPAIDContainer);
+						}
+		
+						data = {
+							vastExtensions: getVastDataBlock($vast.find('Extensions Extension'), 'type'),
+							vastEvents: getVastDataBlock($vast.find('TrackingEvents Tracking'), 'event'),
+							vastClickThrough: $vast.find('VideoClicks ClickTracking').text(),
+							vastImpression: $vast.find('Impression').text(),
+    		  	  playerError: $vast.find('Error').text(),
+							type: $mediaFiles.eq(0).attr('type'), 
+							src: $mediaFiles.eq(0).text(),
+							apiFramework: $mediaFiles.eq(0).attr('apiFramework'), 
+							width: $mediaFiles.eq(0).attr('width'),
+							height: $mediaFiles.eq(0).attr('height')
+						};
 	
-					defer.resolve(data);       
+						console.log(data);
+		
+						defer.resolve(data);  
+
+					}     
 	
 				});
 	
 	
 			} else {
-
-
 	
 				var $mediaFiles = $vast.find('MediaFiles MediaFile');
 		
@@ -407,6 +461,7 @@ var snapshotPrerolls = [], unit;
 
   	state.flashVPaid.loadAdUnit(adURL, function (error, adUnit) {
     	if (error) return;
+
     	unit = adUnit;
 
     	adUnit.handshakeVersion('2.0', initAd);
@@ -425,42 +480,51 @@ var snapshotPrerolls = [], unit;
     	});
 
     	adUnit.on('AdVideoComplete', function (err, result) {
-    	   player.trigger('AdComplete');
-    	   adcanceled();
+    	  player.trigger('AdComplete');
+    	  adcanceled();
+    	  // createCookie('lastAds', getUnix());
     	});
 
     	adUnit.on('AdUserClose', function (err, result) {
-    	   player.trigger('AdSkiped');
-    	   adcanceled();
+    	  player.trigger('AdSkiped');
+    	  adcanceled();
     	});
 
-    	
+    	adUnit.on('AdClickThru', function (err, result) {
+    	   clickThrough();
+    	   adcanceled();
+    	   // createCookie('lastAds', getUnix());
+    	});
+
+    	adUnit.on('AdVideoFirstQuartile', function (err, result) {
+    	   player.trigger('AdFirstQuartile');
+    	});
+
+    	adUnit.on('AdVideoMidpoint', function (err, result) {
+    	   player.trigger('AdMidpoint');
+    	});
+
+    	adUnit.on('AdVideoThirdQuartile', function (err, result) {
+    	   player.trigger('AdThirdQuartile');
+    	});
 
     	// adUnit.on('AdStopped', function (err, result) {
     	//     player.trigger('AdComplete');
- 				// 	adcanceled();
+ 				// 	if(cansel) adcanceled();
+ 				// 	cansel = true;
     	// });
 
+			adUnit.on('AdError', function (err, result) {
+    	   player.trigger('AdError');
+    	});    	
 
-    	
-
-
-
-    	
-
-    	console.log('adUnitLoaded');
+    	    	
 
     	function initAd(err, result) {
     	    console.log('handShake', err, result);
-    	    adUnit.initAd(1000, 800, 'normal', -1, '', '', function (err) {
+    	    adUnit.initAd(800, 400, 'normal', -1, '', '', function (err) {
     	        console.log('initAd', err);
-
-    	        adUnit.pauseAd();
     	    });
-
-    	    // adUnit.resizeAd(1000, 800, 'normal', function (err) {
-    	    //     console.log('resizeAd', err);
-    	    // });
     	}
 
     	function startAd(err, result) {
@@ -469,17 +533,17 @@ var snapshotPrerolls = [], unit;
     	    });
     	}
 
-    	function checkAdProperties() {
-    	    adUnit.getAdIcons(function (err, result) {
-    	        console.log('getAdIcons', result);
-    	    });
-    	    adUnit.setAdVolume(10, function (err, result) {
-    	        console.log('setAdVolume', result);
-    	    });
-    	    adUnit.getAdVolume(function (err, result) {
-    	        console.log('getAdVolume', result);
-    	    });
-    	}
+    	// function checkAdProperties() {
+    	//     adUnit.getAdIcons(function (err, result) {
+    	//         console.log('getAdIcons', result);
+    	//     });
+    	//     adUnit.setAdVolume(10, function (err, result) {
+    	//         console.log('setAdVolume', result);
+    	//     });
+    	//     adUnit.getAdVolume(function (err, result) {
+    	//         console.log('getAdVolume', result);
+    	//     });
+    	// }
 
     });
 

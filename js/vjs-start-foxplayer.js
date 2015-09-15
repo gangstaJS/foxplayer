@@ -1,7 +1,7 @@
 /**
 	OZ@EX.UA
 */
-var periodAds = 300; // 300s == 5m	
+var periodAds = 120; // 300s == 5m	
 
 // --
 
@@ -16,8 +16,8 @@ var periodAds = 300; // 300s == 5m
 // 		can = periodAds-diff;
 // 	}
 
-// 	$('#time_log').text("Следующий показ рекламы возможен через: "+ can + ' сек');
-// }, 500);
+// 	console.log("Следующий показ рекламы возможен через: "+ can + ' сек');
+// }, 1000);
 
 // ---
 
@@ -39,13 +39,22 @@ function initPlayer(node, conf, startIndex) {
 
 	conf.inactivityTimeout = 500;
 	
-	var playerInstance = videojs(node.get(0), {techOrder: conf.techOrder, inactivityTimeout: conf.inactivityTimeout, 'width': '720', 'height': '500'}).ready(function() {
+	var playerInstance = videojs(node.get(0), {techOrder: conf.techOrder, inactivityTimeout: conf.inactivityTimeout, 'width': '780', 'height': '440'}).ready(function() {
 		// this.poster(conf.cover.url);
 
 		// width: 720px; height: 526px;
 		var me = this, pX, pY, pW, pH, $p;
 
 		me.storage = null;
+
+		conf.adsOptions.pre = [
+			{url: 'ads_wrapper.xml'},
+			{url: 'ads2.xml'}
+		];
+
+		me.playerState();
+
+		me.trigger('readyStat');
 
 		
 
@@ -113,7 +122,7 @@ function initPlayer(node, conf, startIndex) {
 		$proxy_l.add($proxy_bottom_shadow).on('click', function() { me[(me.paused() ? 'play': 'pause')](); });
 
 		$top_bar.find('.vjs-close').on('click', function() {
-			me.dispose();
+			me.trigger('close');
 		});
 
 		$top_bar.find('.vjs-collaps').on('click', function() {
@@ -146,7 +155,9 @@ function initPlayer(node, conf, startIndex) {
 		}
 
 		me.on('close', function() {
-			this.dispose();
+			// this.dispose();
+			if(!me.paused()) me.pause();
+			$player.hide();
 		});
 
 		me.on('error', function() {

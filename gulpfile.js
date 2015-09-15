@@ -8,7 +8,8 @@ const GulpSSH  = require('gulp-ssh');
 const fs  = require('fs');
 
 var vjsFiles = [
-    './js/video.js', 
+    './js/video.js',
+    './js/vjs-state.js', 
   	'./js/vjs-playlist.js', 
   	'./js/vjs-hotkeys.js', 
   	'./js/vjs-progress-tooltip.js', 
@@ -41,8 +42,8 @@ var gulpSSH = new GulpSSH({
 gulp.task('js', function() {
   return gulp.src(vjsFiles)
   	.pipe(jshint())
-  	.pipe(reporter = jshint.reporter('default', { ignoreWarning: true, verbose: true }))
-    .pipe(sourcemaps.init())
+  	.pipe(jshint.reporter('default', { ignoreWarning: true, verbose: true }))
+    // .pipe(sourcemaps.init())
     .pipe(concat('concat.js'))
     .pipe(gulp.dest('dist'))
     .pipe(rename('vjs.min.js'))
@@ -63,7 +64,7 @@ gulp.task('js', function() {
           drop_console: false
         }
       }))
-    .pipe(sourcemaps.write())
+    // .pipe(sourcemaps.write())
     .pipe(gulp.dest('dist'));
 });
 

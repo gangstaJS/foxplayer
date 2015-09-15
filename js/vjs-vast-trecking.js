@@ -6,7 +6,12 @@
 	
 
 	var sendEvent = function(url) {
-		$.ajax({url:url, type:'get', dataType:'text'});
+		// var xhrFields = {withCredentials: true};
+		$.ajax({
+			url:url, 
+			type:'get', 
+			dataType:'text'
+		});
 	};
 
 	// --
