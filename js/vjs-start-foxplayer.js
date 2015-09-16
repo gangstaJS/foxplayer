@@ -1,19 +1,19 @@
 /**
 	OZ@EX.UA
 */
-var periodAds = 120; // 300s == 5m	
+var periodAds = 120, periodAfterPaus = 60; // 300s == 5m	
 
 // --
 
 
 // setInterval(function() {
-// 	lastAds = (getCookie('lastAds') || 0);
+// 	lastAds = (getCookie('lastAfterPaus') || 0);
 // 	var diff = (Math.floor((new Date()).getTime()/1000) - lastAds);
 
 // 	var can = 0;
 
-// 	if(diff <= periodAds) {
-// 		can = periodAds-diff;
+// 	if(diff <= periodAfterPaus) {
+// 		can = periodAfterPaus-diff;
 // 	}
 
 // 	console.log("Следующий показ рекламы возможен через: "+ can + ' сек');
@@ -48,15 +48,27 @@ function initPlayer(node, conf, startIndex) {
 		me.storage = null;
 
 		conf.adsOptions.pre = [
-			{url: 'ads_wrapper.xml'},
-			{url: 'ads2.xml'}
+			{url: 'ads.xml'},
+			{url: 'ads2.xml'},
+			// {url: 'ads_wrapper.xml'},
+			// {url: 'ads.xml'},
+			// {url: 'ads2.xml'},
+			// {url: 'ads2.xml'}
+		];
+
+		conf.adsOptions.afterpaus = [
+			{url: 'ads.xml'},
+			// {url: 'ads_wrapper.xml'}
+		];
+
+		conf.adsOptions.post = [
+			{url: 'ads.xml'},
+			// {url: 'ads_wrapper.xml'}
 		];
 
 		me.playerState();
 
-		me.trigger('readyStat');
-
-		
+		me.trigger('readyStat');		
 
 		// --
 
@@ -155,9 +167,9 @@ function initPlayer(node, conf, startIndex) {
 		}
 
 		me.on('close', function() {
-			// this.dispose();
-			if(!me.paused()) me.pause();
-			$player.hide();
+			this.dispose();
+			// if(!me.paused()) me.pause();
+			// $player.hide();
 		});
 
 		me.on('error', function() {
@@ -260,7 +272,7 @@ function initPlayer(node, conf, startIndex) {
 
 		// --
 
-		if(conf.adsOptions.pre && conf.adsOptions.pre.length) {
+		if(conf.adsOptions.afterpaus.length || conf.adsOptions.pre.length) {
 			me.adsPreRolls(conf.adsOptions);
 		}
 

@@ -5,12 +5,15 @@
 
 	
 
-	var sendEvent = function(url) {
+	var sendEvent = function(urlsArr) {
 		// var xhrFields = {withCredentials: true};
-		$.ajax({
-			url:url, 
-			type:'get', 
-			dataType:'text'
+
+		$.each(urlsArr, function(n,url){
+			$.ajax({
+				url:url, 
+				type:'get', 
+				dataType:'text'
+			});
 		});
 	};
 

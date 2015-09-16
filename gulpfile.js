@@ -43,7 +43,7 @@ gulp.task('js', function() {
   return gulp.src(vjsFiles)
   	.pipe(jshint())
   	.pipe(jshint.reporter('default', { ignoreWarning: true, verbose: true }))
-    // .pipe(sourcemaps.init())
+    .pipe(sourcemaps.init())
     .pipe(concat('concat.js'))
     .pipe(gulp.dest('dist'))
     .pipe(rename('vjs.min.js'))
@@ -64,7 +64,7 @@ gulp.task('js', function() {
           drop_console: false
         }
       }))
-    // .pipe(sourcemaps.write())
+    .pipe(sourcemaps.write())
     .pipe(gulp.dest('dist'));
 });
 

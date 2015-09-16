@@ -63,7 +63,11 @@
             case 32:
               event.preventDefault();
               player.trigger( player.paused() ? 'AdResume' : 'AdPause' );
-              if (player.paused()) {
+              if (player.paused()) {    
+                try {
+                  if(!/^ad\-/.test(player.ads.state)) player.trigger('livePause');
+                } catch(e) { console.log(e.message); }
+
                 player.play();
               } else {
                 player.pause();

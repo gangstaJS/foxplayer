@@ -95,7 +95,7 @@
           player.removeClass('vjs-last-playing');
         }
 
-        console.info('%c'+(player.tmpcounter++) + ' [' +  player.pl.currentVideo.title+']', 'color: #fff; background-color: green; font-size: 23px');
+        console.info('%c'+(player.pl.current) + ' [' +  player.pl.currentVideo.title+']', 'color: #fff; background-color: green; font-size: 23px');
 
         player.pl._resumeVideo();
 

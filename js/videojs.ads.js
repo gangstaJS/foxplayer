@@ -239,7 +239,7 @@ var
           // indicate completion.
           window.setTimeout(function() {
             if (!ended) {
-              player.play();
+              player.pause();
             }
             player.off('ended', updateEnded);
           }, 250);
