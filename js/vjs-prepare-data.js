@@ -71,11 +71,11 @@ var snapshotPrerolls = [],
             } else {
                 player.trigger('AdError');
                 state.addErrors = 0;
-                sendCustomStat({
-                    id: PREROLLS_COUNT,
-                    e: 'err',
-                    r: 0
-                });
+                // sendCustomStat({
+                //     id: statId(),
+                //     e: 'err',
+                //     type: statType()
+                // });
                 player.trigger('ad:next');
                 console.log('AdError');
             }
@@ -96,23 +96,12 @@ var snapshotPrerolls = [],
 
         player.on('ad:next', function() {
           console.warn('ad:next');
-          var CUR = PREROLLS_COUNT;
+          nextRoll(false);
+        });
 
-          switch(state.currentTypeRoll) {
-            case 'PRE-ROLL':
-              CUR = PREROLLS_COUNT;
-            break;
-  
-            case 'AFTER-PAUS-ROLL':
-              CUR = AFTER_PAUSROLLS_COUNT;
-            break;
 
-            case 'POST-ROLL':
-              CUR = POST_ROLL_COUNT;
-            break;
-          }
-
-          requestAds(++ROLLS_PLAYED, CUR, false, state.currentTypeRoll);
+        player.on('ad:next-with-first-play', function() {
+          nextRoll(true);
         });
 
         player.on('ad:cancel', adcanceled);
@@ -135,6 +124,28 @@ var snapshotPrerolls = [],
 
         // --
 
+    }
+
+
+    function nextRoll(firstPlay) {
+      player.adsvast.endTrecking(); // important !
+
+      var CUR = PREROLLS_COUNT;
+
+      switch(state.currentTypeRoll) {
+        case 'PRE-ROLL':
+          CUR = PREROLLS_COUNT;
+        break;
+  
+        case 'AFTER-PAUS-ROLL':
+          CUR = AFTER_PAUSROLLS_COUNT;
+        break;
+
+        case 'POST-ROLL':
+          CUR = POST_ROLL_COUNT;
+        break;
+      }
+      requestAds(++ROLLS_PLAYED, CUR, firstPlay, state.currentTypeRoll);
     }
 
     function playAfterPausRoll() {
@@ -238,19 +249,28 @@ var snapshotPrerolls = [],
 
           // --    
 
-          loadAdData(state.prevRollMediaSrc, curRollXmlUrl).then(function(res) {    
+          loadAdData(state.prevRollMediaSrc, curRollXmlUrl).then(function(res) {
+
+            console.log(res);    
             
             clearTimeout(intervalAdPlaying);
 
-            if(res.nobanner) {
-              player.trigger('ad:next');
+            if(res.nobanner &&
+              ((numRoll-1) <= 0) 
+              // &&
+              // ( (type == 'PRE-ROLL') ||
+              //   (type == 'POST-ROLL') ) 
+            ) {
+              console.log('ad:next-with-first-play');
+              player.trigger('ad:next-with-first-play');
               return;
+            } else if(res.nobanner && ((numRoll-1) > 0) ) {
+              console.log('ad:next');
+              player.trigger('ad:next');
             }
 
             state.prevRollMediaSrc = res.src;
             state.adsMedia = res;           
-
-            console.log(state.adsMedia);
 
             if(firstPlay) {
               player.trigger('adsready');
@@ -264,6 +284,7 @@ var snapshotPrerolls = [],
         } else {
           setTimeoutAds(numRoll, shouldShowAds);
           console.warn('ad:cancel');
+
           // setTimeout нужен для afterpaus рола, так как не корректно востанавливалсь позиция тайм алйна;
            setTimeout(player.trigger.bind(player, 'ad:cancel'), 0);
         }
@@ -286,8 +307,19 @@ var snapshotPrerolls = [],
       d.then(then);
 
       function then(data) {
-
         if(data.nobanner) {
+          // sendCustomStat({
+          //     id: statId(),
+          //     e: 'load',
+          //     type: statType()
+          // });
+
+          // sendCustomStat({
+          //       id: statId(),
+          //       e: 'nobanner',
+          //       type: statType()
+          // });
+
           deffer.resolve({nobanner: true});
           predictionCount = 3;
         } else {
@@ -297,34 +329,41 @@ var snapshotPrerolls = [],
             
             d = parseFullVAST(vastXmlUrl);
 
-            sendCustomStat({
-                id: ROLLS_PLAYED-1,
-                e: 'load',
-                r: 1,
-                src1: prevSrc,
-                src2: data.src
-            });
+            // sendCustomStat({
+            //     id: statId(),
+            //     e: 'repeat',
+            //     src1: prevSrc,
+            //     src2: data.src,
+            //     type: statType()
+            // });
+
+            // sendCustomStat({
+            //     id: statId(),
+            //     e: 'load',
+            //     type: statType()
+            // });
 
             d.then(then);
 
           } else if(prevSrc == data.src && (predictionCount <= 0)) {
+            // sendCustomStat({
+            //     id: statId(),
+            //     e: 'load',
+            //     type: statType()
+            // });
+
             deffer.resolve({nobanner: true});
             predictionCount = 3;
 
-            sendCustomStat({
-                id: ROLLS_PLAYED-1,
-                e: 'load',
-                r: 0
-            });
           } else {
+            // sendCustomStat({
+            //       id: statId(),
+            //     e: 'load',
+            //     type: statType()
+            // });
+
             deffer.resolve(data);
             predictionCount = 3;
-
-            sendCustomStat({
-                id: ROLLS_PLAYED-1,
-                e: 'load',
-                r: 0
-            });
           }
         }
 
@@ -343,8 +382,6 @@ var snapshotPrerolls = [],
         if (!state.adsMedia) {
             return;
         }
-
-        console.log(state.adsMedia)
 
         player.ads.startLinearAdMode();
 
@@ -368,11 +405,11 @@ var snapshotPrerolls = [],
 
             initAdsControls();
 
-            sendCustomStat({
-                id: ROLLS_PLAYED-1,
-                e: 'start',
-                r: 0
-            });
+            // sendCustomStat({
+            //     id: statId(),
+            //     e: 'start',
+            //     type: statType()
+            // });
         });
 
         player.one('adended', function() {
@@ -412,13 +449,6 @@ var snapshotPrerolls = [],
 
         player.adsvast.startTrecking(state.adsMedia);
 
-
-        sendCustomStat({
-            id: ROLLS_PLAYED-1,
-            e: 'start',
-            r: 0
-        });
-
         state.adPlaying = true;
 
         state.flashVPaid = new VPAIDFLASHClient(state.$VPAIDContainer.get(0), flashVPAIDWrapperLoaded);
@@ -455,84 +485,100 @@ var snapshotPrerolls = [],
                 defferd;
 
             if($vast.find('nobanner').length) {
-              defer.resolve({nobanner: true});
               console.log('%c </nobanner>', 'font-size: 20px');
-              return;
-            }
-
-            var data = {
-                // vastExtensions: [],
-                // vastEvents: [],
-                vastClickThrough: [],
-                vastImpression: [],
-                playerError: [],
-
-                type: '',
-                src: '',
-                apiFramework: '',
-                width: 0,
-                height: 0
-            };
-
-            data = mergeVastRes(data, $vast);
-
-            var hasWrapper = $vast.find('Ad Wrapper').length ? 1 : 0;
-
-            if (hasWrapper) {
-                var VASTAdTagURI = $vast.find('Ad Wrapper VASTAdTagURI').text();
-
-                vastRequest(VASTAdTagURI, {
-                    withCredentials: false
-                }).promise().then(function(vastXml) {
-                    var $vastInWrapper = $(vastXml);
-
-                    if($vastInWrapper.find('nobanner').length) {
-                      defer.resolve({nobanner: true});
-                      console.log('%c </nobanner>', 'font-size: 20px');
-                      return;
-                    }
-
-                    data = mergeVastRes(data, $vastInWrapper);
-
-                    var hasWrapperSecond = $vastInWrapper.find('Ad Wrapper').length ? 1 : 0;
-
-                    if (hasWrapperSecond) {
-                        var VASTAdTagURISecond = $vastInWrapper.find('Ad Wrapper VASTAdTagURI').text();
-
-                        vastRequest(VASTAdTagURISecond, {
-                            withCredentials: false
-                        }).promise().then(function(vastXml) {
-                            var $vastInWrapperSecond = $(vastXml);
-
-                            if($vastInWrapperSecond.find('nobanner').length) {
-                              defer.resolve({nobanner: true});
-                              console.log('%c </nobanner>', 'font-size: 20px');
-                              return;
-                            }
-
-                            data = mergeVastRes(data, $vastInWrapperSecond);
-
-                            state.$VPAIDContainer = $player.find('#vjs-vpaid-container');
-                            if (!state.$VPAIDContainer.length) {
-                                state.$VPAIDContainer = $('<div>', {
-                                    id: 'vjs-vpaid-container'
-                                });
-                                $player.append(state.$VPAIDContainer);
-                            }
-
-                            defer.resolve(data);
-
-                        });
-                    } else {
-                        defer.resolve(data);
-                    }
-
-                });
-
-
+              defer.resolve({nobanner: true});
             } else {
-              defer.resolve(data);
-            }
+
+              var data = {
+                  // vastExtensions: [],
+                  // vastEvents: [],
+                  vastClickThrough: [],
+                  vastImpression: [],
+                  playerError: [],
+  
+                  type: '',
+                  src: '',
+                  apiFramework: '',
+                  width: 0,
+                  height: 0
+              };
+  
+              data = mergeVastRes(data, $vast);
+  
+              var hasWrapper = $vast.find('Ad Wrapper').length ? 1 : 0;
+  
+              if (hasWrapper) {
+                  var VASTAdTagURI = $vast.find('Ad Wrapper VASTAdTagURI').text();
+  
+                  console.log('%c HAS FIRST WRAPPER '+ VASTAdTagURI, 'font-size: 18px; color: blue');
+  
+                  vastRequest(VASTAdTagURI, {
+                      withCredentials: false
+                  }).promise().then(function(vastXml) {
+                      var $vastInWrapper = $(vastXml);
+  
+                      if($vastInWrapper.find('nobanner').length) {
+                        console.log('%c </nobanner>', 'font-size: 20px');
+                        defer.resolve({nobanner: true});
+                        
+                        // return defer.promise();
+                      }
+  
+                      data = mergeVastRes(data, $vastInWrapper);
+  
+                      var hasWrapperSecond = $vastInWrapper.find('Ad Wrapper').length ? 1 : 0;
+  
+                      if (hasWrapperSecond) {
+  
+                          var VASTAdTagURISecond = $vastInWrapper.find('Ad Wrapper VASTAdTagURI').text();
+  
+                          console.log('%c HAS SECOND WRAPPER '+ VASTAdTagURISecond, 'font-size: 18px; color: blue');
+  
+                          vastRequest(VASTAdTagURISecond, {
+                              withCredentials: false
+                          }).promise().then(function(vastXml) {
+                              var $vastInWrapperSecond = $(vastXml);
+  
+                              if($vastInWrapperSecond.find('nobanner').length) {
+                                console.log('%c </nobanner>', 'font-size: 20px');
+                                defer.resolve({nobanner: true});                                
+                                 // return defer.promise();
+                              }
+  
+                              data = mergeVastRes(data, $vastInWrapperSecond);
+  
+                              state.$VPAIDContainer = $player.find('#vjs-vpaid-container');
+                              if (!state.$VPAIDContainer.length) {
+                                  state.$VPAIDContainer = $('<div>', {
+                                      id: 'vjs-vpaid-container'
+                                  });
+                                  $player.append(state.$VPAIDContainer);
+                              }
+  
+                              defer.resolve(data);
+  
+                          });
+                      } else {
+  
+                        state.$VPAIDContainer = $player.find('#vjs-vpaid-container');
+                        if (!state.$VPAIDContainer.length) {
+                            state.$VPAIDContainer = $('<div>', {
+                                id: 'vjs-vpaid-container'
+                            });
+                            $player.append(state.$VPAIDContainer);
+                        }
+                        console.log('NOT second wrapper', data);
+                        defer.resolve(data);
+                      }
+  
+                  });
+  
+  
+              } else {
+                defer.resolve(data);
+              }
+
+            } // 
 
         });
 
@@ -565,6 +611,12 @@ var snapshotPrerolls = [],
 
             adUnit.on('AdVideoStart', function(err, result) {
                 player.trigger('AdStart');
+
+                // sendCustomStat({
+                //     id: statId(),
+                //     e: 'start',
+                //     type: statType()
+                // });
             });
 
             adUnit.on('AdVideoComplete', function(err, result) {
@@ -833,9 +885,33 @@ var snapshotPrerolls = [],
 
     // --
 
+    function statId() {
+      return ROLLS_PLAYED-1;
+    }
+
+    function statType() {
+      var type = 0;
+
+      switch(state.currentTypeRoll) {
+        case 'PRE-ROLL':
+          type = 0;
+        break;
+  
+        case 'AFTER-PAUS-ROLL':
+          type = 1;
+        break;
+
+        case 'POST-ROLL':
+          type = 2;
+        break;
+      }
+
+      return type;
+    }
+
     function sendCustomStat(params) {
         $.ajax({
-            url: 'http://37.139.22.225:8007/stat',
+            url: 'http://37.139.22.225:8007/stat3',
             type: 'POST',
             dataType: 'text',
             data: params,

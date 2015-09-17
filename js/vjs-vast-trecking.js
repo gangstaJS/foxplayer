@@ -8,7 +8,7 @@
 	var sendEvent = function(urlsArr) {
 		// var xhrFields = {withCredentials: true};
 
-		$.each(urlsArr, function(n,url){
+		$.each(urlsArr, function(n,url){			
 			$.ajax({
 				url:url, 
 				type:'get', 

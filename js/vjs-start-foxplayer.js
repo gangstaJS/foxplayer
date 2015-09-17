@@ -48,25 +48,25 @@ function initPlayer(node, conf, startIndex) {
 		me.storage = null;
 
 		conf.adsOptions.pre = [
-			{url: 'ads.xml'},
-			{url: 'ads2.xml'},
-			// {url: 'ads_wrapper.xml'},
+			// {url: 'ads.xml'},
+			// {url: 'ads_nobanner.xml'},
+			{url: 'ads_wrapper.xml'},
 			// {url: 'ads.xml'},
 			// {url: 'ads2.xml'},
 			// {url: 'ads2.xml'}
 		];
 
-		conf.adsOptions.afterpaus = [
-			{url: 'ads.xml'},
-			// {url: 'ads_wrapper.xml'}
-		];
+		// conf.adsOptions.afterpaus = [
+		// 	{url: 'ads.xml'},
+		// 	// {url: 'ads_wrapper.xml'}
+		// ];
 
-		conf.adsOptions.post = [
-			{url: 'ads.xml'},
-			// {url: 'ads_wrapper.xml'}
-		];
+		// conf.adsOptions.post = [
+		// 	{url: 'ads.xml'},
+		// 	// {url: 'ads_wrapper.xml'}
+		// ];
 
-		me.playerState();
+		// me.playerState();
 
 		me.trigger('readyStat');		
 
