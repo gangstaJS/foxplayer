@@ -239,9 +239,9 @@ function initPlayer(node, conf, startIndex) {
 			svgAnim.attr(playObj).get(0).beginElement();
 		});
 
-		me.on('setcontent', function() {
+		// me.on('setcontent', function() {
 
-		});
+		// });
 
 		// ---
 
