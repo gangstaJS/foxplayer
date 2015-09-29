@@ -525,3 +525,42 @@ filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#40000000', e
 .vjs-last-playing .vjs-next-btn:hover:after {
 	color: #fff !important;
 }
+
+
+/* flash note */
+
+.vjs-flash-note {
+	color: #fff;
+	background-color: rgba(249,32,32,.9);
+	display: none;
+	position: absolute;
+	z-index: -1;
+	text-align: left;
+	white-space: normal;
+	padding: 10px 25px 10px 10px;
+	font-size: 16px;
+}
+
+.vjs-flash-note .vjs-close-note {
+	position: absolute;
+    width: 20px;
+    height: 20px;
+    right: 10px; top: 10px;
+    cursor: pointer;
+}
+
+.vjs-close-note:after {
+	content: "\e605";
+	font-family: 'FOXfont';
+    font-size: 17px;    
+    font-style: normal;
+}
+
+.vjs-flash-tech .vjs-flash-note {
+	display: block;
+	z-index: 999;
+}
+
+.vjs-flash-tech .vjs-flash-note:hover {
+	background-color: rgba(249,32,32,1);
+}

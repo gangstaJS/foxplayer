@@ -71,11 +71,11 @@ var snapshotPrerolls = [],
             } else {
                 player.trigger('AdError');
                 state.addErrors = 0;
-                // sendCustomStat({
-                //     id: statId(),
-                //     e: 'err',
-                //     type: statType()
-                // });
+                sendCustomStat({
+                    id: statId(),
+                    e: 'err',
+                    type: statType()
+                });
                 player.trigger('ad:next');
                 console.log('AdError');
             }
@@ -211,7 +211,7 @@ var snapshotPrerolls = [],
 
         switch(type) {
           case 'PRE-ROLL':
-            shouldShowAds = isTimeForPreroll();
+            shouldShowAds = true; //isTimeForPreroll();
             rollsConf = settings.pre;
           break;
 
@@ -308,17 +308,17 @@ var snapshotPrerolls = [],
 
       function then(data) {
         if(data.nobanner) {
-          // sendCustomStat({
-          //     id: statId(),
-          //     e: 'load',
-          //     type: statType()
-          // });
+          sendCustomStat({
+              id: statId(),
+              e: 'load',
+              type: statType()
+          });
 
-          // sendCustomStat({
-          //       id: statId(),
-          //       e: 'nobanner',
-          //       type: statType()
-          // });
+          sendCustomStat({
+                id: statId(),
+                e: 'nobanner',
+                type: statType()
+          });
 
           deffer.resolve({nobanner: true});
           predictionCount = 3;
@@ -329,38 +329,38 @@ var snapshotPrerolls = [],
             
             d = parseFullVAST(vastXmlUrl);
 
-            // sendCustomStat({
-            //     id: statId(),
-            //     e: 'repeat',
-            //     src1: prevSrc,
-            //     src2: data.src,
-            //     type: statType()
-            // });
+            sendCustomStat({
+                id: statId(),
+                e: 'repeat',
+                src1: prevSrc,
+                src2: data.src,
+                type: statType()
+            });
 
-            // sendCustomStat({
-            //     id: statId(),
-            //     e: 'load',
-            //     type: statType()
-            // });
+            sendCustomStat({
+                id: statId(),
+                e: 'load',
+                type: statType()
+            });
 
             d.then(then);
 
           } else if(prevSrc == data.src && (predictionCount <= 0)) {
-            // sendCustomStat({
-            //     id: statId(),
-            //     e: 'load',
-            //     type: statType()
-            // });
+            sendCustomStat({
+                id: statId(),
+                e: 'load',
+                type: statType()
+            });
 
             deffer.resolve({nobanner: true});
             predictionCount = 3;
 
           } else {
-            // sendCustomStat({
-            //       id: statId(),
-            //     e: 'load',
-            //     type: statType()
-            // });
+            sendCustomStat({
+                  id: statId(),
+                e: 'load',
+                type: statType()
+            });
 
             deffer.resolve(data);
             predictionCount = 3;
@@ -405,11 +405,11 @@ var snapshotPrerolls = [],
 
             initAdsControls();
 
-            // sendCustomStat({
-            //     id: statId(),
-            //     e: 'start',
-            //     type: statType()
-            // });
+            sendCustomStat({
+                id: statId(),
+                e: 'start',
+                type: statType()
+            });
         });
 
         player.one('adended', function() {
@@ -612,11 +612,11 @@ var snapshotPrerolls = [],
             adUnit.on('AdVideoStart', function(err, result) {
                 player.trigger('AdStart');
 
-                // sendCustomStat({
-                //     id: statId(),
-                //     e: 'start',
-                //     type: statType()
-                // });
+                sendCustomStat({
+                    id: statId(),
+                    e: 'start',
+                    type: statType()
+                });
             });
 
             adUnit.on('AdVideoComplete', function(err, result) {
@@ -911,7 +911,7 @@ var snapshotPrerolls = [],
 
     function sendCustomStat(params) {
         $.ajax({
-            url: 'http://37.139.22.225:8007/stat3',
+            url: 'http://213.133.191.35:8007/stat3',
             type: 'POST',
             dataType: 'text',
             data: params,

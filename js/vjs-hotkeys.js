@@ -201,7 +201,7 @@
 
       player.volume(curVol);
 
-      console.log(curVol);     
+      // console.log(curVol);     
 
     });
 

@@ -18,6 +18,16 @@
 
 		player.on('readyStat', function() {
 			stat({e: 'load'});
+
+			setTimeout(function() {
+				
+				if(isFlashTech()) {
+					stat({e: 'flash'});
+				} else {
+					console.log('Not flash');
+				}
+
+			}, 0);
 		});
 
 		player.on('error', function() {
@@ -69,7 +79,7 @@
 
 		function stat(params) {
 			$.ajax({
-				url: 'http://37.139.22.225:8007/stat2',
+				url: 'http://213.133.191.35:8007/stat2',
 				type: 'POST',
 				dataType: 'text',
 				data: params,
@@ -78,6 +88,11 @@
 				}
 			});
 		}
+
+		// detect flash follback
+    	function isFlashTech() {
+    	    return $('#' + player.id() + '_flash_api').length ? 1 : 0;
+    	}
 
 	}
 

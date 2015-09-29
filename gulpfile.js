@@ -14,6 +14,7 @@ var vjsFiles = [
   	'./js/vjs-playlist.js', 
   	'./js/vjs-hotkeys.js', 
   	'./js/vjs-progress-tooltip.js', 
+    './js/vjs-flash-note.js',
   	'./js/vjs-vast-trecking.js',
   	'./js/videojs.ads.js',
   	'./js/vjs-prepare-data.js',  	
@@ -44,7 +45,7 @@ gulp.task('js', function() {
   return gulp.src(vjsFiles)
   	.pipe(jshint())
   	.pipe(jshint.reporter('default', { ignoreWarning: true, verbose: true }))
-    .pipe(sourcemaps.init())
+    // .pipe(sourcemaps.init())
     .pipe(concat('concat.js'))
     .pipe(gulp.dest('dist'))
     .pipe(rename('vjs.min.js'))
@@ -62,10 +63,10 @@ gulp.task('js', function() {
           unused: true,
           if_return: true,
           join_vars: true,
-          drop_console: false
+          drop_console: true
         }
       }))
-    .pipe(sourcemaps.write())
+    // .pipe(sourcemaps.write())
     .pipe(gulp.dest('dist'));
 });
 

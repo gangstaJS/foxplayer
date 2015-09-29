@@ -47,14 +47,14 @@ function initPlayer(node, conf, startIndex) {
 
 		me.storage = null;
 
-		conf.adsOptions.pre = [
-			// {url: 'ads.xml'},
-			// {url: 'ads_nobanner.xml'},
-			{url: 'ads_wrapper.xml'},
-			// {url: 'ads.xml'},
-			// {url: 'ads2.xml'},
-			// {url: 'ads2.xml'}
-		];
+		// conf.adsOptions.pre = [
+		// 	// {url: 'ads.xml'},
+		// 	// {url: 'ads_nobanner.xml'},
+		// 	{url: 'ads_wrapper.xml'},
+		// 	// {url: 'ads.xml'},
+		// 	// {url: 'ads2.xml'},
+		// 	// {url: 'ads2.xml'}
+		// ];
 
 		// conf.adsOptions.afterpaus = [
 		// 	{url: 'ads.xml'},
@@ -66,7 +66,7 @@ function initPlayer(node, conf, startIndex) {
 		// 	// {url: 'ads_wrapper.xml'}
 		// ];
 
-		// me.playerState();
+		me.playerState();
 
 		me.trigger('readyStat');		
 
@@ -77,7 +77,6 @@ function initPlayer(node, conf, startIndex) {
 		var $top_bar = $('<div>', {'class': 'vjs-top-bar'});
 		$top_bar.append('<span></span> <div><i class="vjs-collaps"></i><i class="vjs-close"></i><div>');
 		$p.append($top_bar);
-
 
 		setTimeout(function() { $p.focus(); }, 0);
 
@@ -300,6 +299,20 @@ function initPlayer(node, conf, startIndex) {
 			}
 		});
 
+
+		// detect flash follback
+    	function isFlashTech() {
+        	return $('#' + me.id() + '_flash_api').length ? 1 : 0;
+    	}
+
+    	if(isFlashTech()) {
+    		me.addClass('vjs-flash-tech');
+    		// plugun for note flash follback
+			this.flashNote();
+    	} else {
+    		me.removeClass('vjs-flash-tech');
+    	}
+
 	});	// end player ready
 
 	var $player = $(playerInstance.el()).show(), $win = $(window);	
@@ -364,8 +377,14 @@ function initPlayer(node, conf, startIndex) {
 				((conf.playlist.length > 1) && (this.ads.state == 'postroll?')) 
 				// || !conf.adsOptions.pre.length
 				) {
+
+					if(!this.hasClass('vjs-last-playing')) {
 						this.next();
-						console.info('next media start');			
+						console.info('next media start');
+					} else {
+						setTimeout(function() {window.clearTimeout(playerInstance.ads._fireEndedTimeout)}, 0);
+						console.log('Playlist complited');
+					}		
 
 			} else if((conf.playlist.length > 1) &&  (this.ads.state == 'content-playback')) {
 				playerInstance.play();
