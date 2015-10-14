@@ -19,6 +19,10 @@
 		player.on('readyStat', function() {
 			stat({e: 'load'});
 
+			if(isMobile()) {
+				stat({e: 'mobile'});
+			}
+
 			setTimeout(function() {
 				
 				if(isFlashTech()) {

@@ -83,7 +83,18 @@ var snapshotPrerolls = [],
         });
 
         player.on('adstart', function() {
-            this.volume(0.3);
+          var vol = 0.3;
+          if(player.storage) {
+            vol = player.storage.getItem('vol') || 0.3;
+          }
+
+          this.volume(0.3);
+          player.trigger('volumechange');
+
+          if(player.storage) {
+            player.storage.setItem('vol', vol);
+          }
+
         });
 
         player.on('contentupdate', function() {
@@ -145,6 +156,7 @@ var snapshotPrerolls = [],
           CUR = POST_ROLL_COUNT;
         break;
       }
+
       requestAds(++ROLLS_PLAYED, CUR, firstPlay, state.currentTypeRoll);
     }
 
@@ -181,6 +193,13 @@ var snapshotPrerolls = [],
         }
 
         ROLLS_PLAYED = 0;
+
+        if(player.storage) {
+          var vol = player.storage.getItem('vol') || 0.5;
+          player.volume(vol);
+        } else {
+          player.volume(0.5);
+        }
 
         console.log('adcanceled');
     }
@@ -235,7 +254,7 @@ var snapshotPrerolls = [],
 
         console.log(shouldShowAds, numRoll, countRoll);
 
-        if(numRoll <= countRoll && shouldShowAds && (player.pl.currentVideo.type !== 'audio') && !isFlashTech()) {
+        if(numRoll <= countRoll && shouldShowAds && (player.pl.currentVideo.type !== 'audio') && !isFlashTech() && !isMobileSafari()/* && !isSafari()*/) {
 
           console.log('numRoll', numRoll, rollsConf);
           var curRollXmlUrl = rollsConf[numRoll-1].url;
@@ -255,18 +274,16 @@ var snapshotPrerolls = [],
             
             clearTimeout(intervalAdPlaying);
 
-            if(res.nobanner &&
-              ((numRoll-1) <= 0) 
-              // &&
-              // ( (type == 'PRE-ROLL') ||
-              //   (type == 'POST-ROLL') ) 
+            if( (res.nobanner && ((numRoll-1) <= 0)) ||
+                ((res.type == 'video/x-flv') && ((numRoll-1) <= 0))
             ) {
               console.log('ad:next-with-first-play');
               player.trigger('ad:next-with-first-play');
               return;
-            } else if(res.nobanner && ((numRoll-1) > 0) ) {
+            } else if(res.nobanner && ((numRoll-1) > 0) || ((res.type == 'video/x-flv') && ((numRoll-1) > 0)) ) {
               console.log('ad:next');
               player.trigger('ad:next');
+              return;
             }
 
             state.prevRollMediaSrc = res.src;
@@ -762,28 +779,38 @@ var snapshotPrerolls = [],
             console.warn(e.message);
         }
 
-        state.adsMedia.vastExtensions.skipTime = convertToSeconds(state.adsMedia.vastExtensions.skipTime[0]);
-        if (state.adsMedia.vastExtensions.skipButton[0]) { // проверяем разрешен ли скип рекламы.
-            if (state.adsMedia.vastExtensions.skipTime <= 0) { // показать скип кнопку сразу
-                skipBtnEl.css('display', 'block');
-            } else {
-                player.on('timeupdate', checkSkip);
-            }
+        try {
+          state.adsMedia.vastExtensions.skipTime = convertToSeconds(state.adsMedia.vastExtensions.skipTime[0]);
+          
+          if (state.adsMedia.vastExtensions.skipButton[0]) { // проверяем разрешен ли скип рекламы.
+              if (state.adsMedia.vastExtensions.skipTime <= 0) { // показать скип кнопку сразу
+                  skipBtnEl.css('display', 'block');
+              } else {
+                  player.on('timeupdate', checkSkip);
+              }
+  
+  
+              player.on(skipBtnEl.get(0), 'click', skipAds);
+  
+          } else {
+              console.info('Skip button disable');
+          }
 
-
-            player.on(skipBtnEl.get(0), 'click', skipAds);
-
-        } else {
-            console.info('Skip button disable');
+        } catch(e) {
+          console.log(e.message);
         }
 
+        try {
+          // проверяем кликабельный ли видео элемент рекламы
+          if (state.adsMedia.vastExtensions.isClickable[0]) {
+              addClickLayerEl.html(state.adsMedia.vastExtensions.linkTxt[0]);
+              player.on(addClickLayerEl.get(0), 'click', clickThrough);
+          } else {
+              console.info('isClickable disable');
+          }
 
-        // проверяем кликабельный ли видео элемент рекламы
-        if (state.adsMedia.vastExtensions.isClickable[0]) {
-            addClickLayerEl.html(state.adsMedia.vastExtensions.linkTxt[0]);
-            player.on(addClickLayerEl.get(0), 'click', clickThrough);
-        } else {
-            console.info('isClickable disable');
+        } catch(e) {
+          console.log(e.message);
         }
 
         player.on('timeupdate', checkTimes);
@@ -919,6 +946,14 @@ var snapshotPrerolls = [],
                 console.log('Custom stat', res);
             }
         });
+    }
+
+    function isMobileSafari() {
+      return navigator.userAgent.match(/(iPod|iPhone|iPad)/) && navigator.userAgent.match(/AppleWebKit/)
+    }
+
+    function isSafari() {
+      return navigator.userAgent.indexOf("Safari") > -1;
     }
 
 

@@ -142,6 +142,8 @@
   };
   
   vjs.Player.prototype.byIndex = function(index){
+    if(/^ad\-/.test(this.ads.state)) return;
+
     if(this.currentSrc()) {
       this.trigger('adstop');
     };
