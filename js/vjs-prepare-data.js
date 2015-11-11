@@ -19,7 +19,9 @@ var snapshotPrerolls = [],
 
         // ads controls 
         skipBtnEl,
-        addClickLayerEl;
+        addClickLayerEl,
+        allowMimeTypes = ['video/ogg', 'video/mp4', 'video/webm', 'application/x-shockwave-flash'],
+        loadDataPromise;
 
     function adsPreRolls(options) {
         player = this;
@@ -36,7 +38,7 @@ var snapshotPrerolls = [],
         POST_ROLL_COUNT       = settings.post.length;
 
         $player = $(player.el());
-        $videoEl = $('#' + player.id());
+        $videoEl = $('#' + player.id() + '_html5_api');
 
         player.vastEventsTracking();
         player.ads(settings);
@@ -98,7 +100,7 @@ var snapshotPrerolls = [],
         });
 
         player.on('contentupdate', function() {
-            requestAds(++ROLLS_PLAYED, PREROLLS_COUNT, true);
+            if(!player.currentSrc()) requestAds(++ROLLS_PLAYED, PREROLLS_COUNT, true);
         });
 
         if(player.currentSrc()) {
@@ -262,25 +264,33 @@ var snapshotPrerolls = [],
 
           // --
 
-          var intervalAdPlaying = setTimeout(function(){
-            player.trigger('ad:next');
-          }, 2000);
+          // var intervalAdPlaying = setTimeout(function(){
+
+          //   console.log(loadDataPromise);
+
+          //   loadDataPromise.reject('timeout ad');
+
+          //   player.trigger('ad:next');
+
+          // }, 2000);
 
           // --    
 
-          loadAdData(state.prevRollMediaSrc, curRollXmlUrl).then(function(res) {
+          loadDataPromise = loadAdData(state.prevRollMediaSrc, curRollXmlUrl);
+
+          loadDataPromise.then(function(res) {
 
             console.log(res);    
             
-            clearTimeout(intervalAdPlaying);
+            // clearTimeout(intervalAdPlaying);
 
             if( (res.nobanner && ((numRoll-1) <= 0)) ||
-                ((res.type == 'video/x-flv') && ((numRoll-1) <= 0))
+                ((allowMimeTypes.indexOf(res.type) == -1) && ((numRoll-1) <= 0))
             ) {
               console.log('ad:next-with-first-play');
               player.trigger('ad:next-with-first-play');
               return;
-            } else if(res.nobanner && ((numRoll-1) > 0) || ((res.type == 'video/x-flv') && ((numRoll-1) > 0)) ) {
+            } else if(res.nobanner && ((numRoll-1) > 0) || ((allowMimeTypes.indexOf(res.type) == -1) && ((numRoll-1) > 0)) ) {
               console.log('ad:next');
               player.trigger('ad:next');
               return;
@@ -296,6 +306,8 @@ var snapshotPrerolls = [],
               beforePlayAd();
             }
 
+          }, function(reason) {
+            console.log(reason);
           });
 
         } else {
@@ -481,7 +493,7 @@ var snapshotPrerolls = [],
             };
         }
 
-        console.log('vastURL >>>', vastURL);
+        console.warn('vastURL >>>', vastURL);
         return $.ajax({
             url: vastURL,
             dataType: 'xml',
@@ -584,7 +596,7 @@ var snapshotPrerolls = [],
                             });
                             $player.append(state.$VPAIDContainer);
                         }
-                        console.log('NOT second wrapper', data);
+                        console.log('NOT second wrapper');
                         defer.resolve(data);
                       }
   
@@ -712,7 +724,7 @@ var snapshotPrerolls = [],
         elems.each(function(n, el) {
             var val = $(this).text();
 
-            if(obj[$(this).attr(attr)]) {
+            if(obj[$(this).attr(attr)] && (attr == 'event')) {
               obj[$(this).attr(attr)].push( (isFinite(val) ? parseInt(val) : val) );
             } else {
               obj[$(this).attr(attr)] = [ (isFinite(val) ? parseInt(val) : val) ];
@@ -723,6 +735,9 @@ var snapshotPrerolls = [],
     }
 
     function mergeVastTags(arr, data) {
+      data = data || '';
+      data = data.trim();
+
       if(!data.length) return arr;
 
       if(Object.prototype.toString.call(arr) === '[object Array]') {
@@ -738,17 +753,40 @@ var snapshotPrerolls = [],
 
     function mergeVastRes(data, $vast) {
 
-      var $mediaFiles = $vast.find('MediaFiles MediaFile');
+      var $mediaFiles = $vast.find('MediaFiles MediaFile'), media = $();
 
       if ($mediaFiles.length) {
-        data.type = $mediaFiles.eq(0).attr('type'),
-        data.src = $mediaFiles.eq(0).text(),
-        data.apiFramework = $mediaFiles.eq(0).attr('apiFramework'),
-        data.width = $mediaFiles.eq(0).attr('width'),
-        data.height = $mediaFiles.eq(0).attr('height')
+
+        $mediaFiles.each(function(n,el) {
+          var mediaType = $(this).attr('type');
+
+          if(($videoEl.get(0).canPlayType( mediaType ) == 'maybe') ||
+            ($videoEl.get(0).canPlayType( mediaType ) == 'probably') ||
+            (mediaType == 'application/x-shockwave-flash') // vpaid
+          ) {
+
+            console.log('mediaType', mediaType);
+
+            media = $(this);
+            return false;
+
+          }
+        });
+
+        data.type = media.attr('type'),
+        data.src = media.text(),
+        data.apiFramework = media.attr('apiFramework'),
+        data.width = media.attr('width'),
+        data.height = media.attr('height');
+
       }
-  
-      data.vastClickThrough = mergeVastTags(data.vastClickThrough, $vast.find('VideoClicks ClickThrough').text());
+    
+      var $clickThrough = $vast.find('VideoClicks ClickThrough');
+      
+      if($clickThrough.length) {
+        data.vastClickThrough = [$vast.find('VideoClicks ClickThrough').text()];
+      }
+
       data.vastClickThrough = mergeVastTags(data.vastClickThrough, $vast.find('VideoClicks ClickTracking').text()); 
       data.vastImpression = mergeVastTags(data.vastImpression, $vast.find('Impression').text());
       data.playerError = mergeVastTags(data.playerError,  $vast.find('Error').text());   
@@ -800,6 +838,14 @@ var snapshotPrerolls = [],
           console.log(e.message);
         }
 
+        if(!state.adsMedia.vastExtensions.linkTxt) {
+          state.adsMedia.vastExtensions.linkTxt = ['Перейти на сайт рекламодателя'];
+        }
+
+        if(!state.adsMedia.vastExtensions.isClickable) {
+          state.adsMedia.vastExtensions.isClickable = [1];
+        }
+
         try {
           // проверяем кликабельный ли видео элемент рекламы
           if (state.adsMedia.vastExtensions.isClickable[0]) {
@@ -810,7 +856,7 @@ var snapshotPrerolls = [],
           }
 
         } catch(e) {
-          console.log(e.message);
+          console.warn(e.message);
         }
 
         player.on('timeupdate', checkTimes);

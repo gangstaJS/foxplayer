@@ -48,10 +48,13 @@ function initPlayer(node, conf, startIndex) {
 		me.storage = null;
 
 		// conf.adsOptions.pre = [
-		// 	{url: 'ads.xml'},
-		// 	{url: 'ads_nobanner.xml'},
-		// 	// {url: 'ads_wrapper.xml'},
 		// 	// {url: 'ads.xml'},
+		// 	// {url: 'ads_nobanner.xml'},
+			
+			
+		// 	// {url: 'http://ads.adfox.ru/175105/getCode?p1=beygm&p2=emxn&pfc=a&pfb=a&plp=a&pli=a&pop=a'},
+		// 	{url: 'http://ads.adfox.ru/175105/getCode?p1=beygm&p2=emxn&pfc=a&pfb=a&plp=a&pli=a&pop=a'},
+		// 	{url: 'http://ads.adfox.ru/175105/getCode?p1=beygm&p2=emxn&pfc=a&pfb=a&plp=a&pli=a&pop=a'},
 		// 	// {url: 'ads2.xml'},
 		// 	// {url: 'ads2.xml'}
 		// ];

@@ -72,7 +72,7 @@
 		};
 
 		player.adsvast.AdClickThrough = function() {
-			window.open(eventStat.vastClickThrough);
+			window.open(eventStat.vastClickThrough[0]);
 			sendEvent(eventStat.addClick);
 			console.log('%c AdClickThrough', style);
 		};
