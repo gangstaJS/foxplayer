@@ -266,9 +266,7 @@ var snapshotPrerolls = [],
 
           // var intervalAdPlaying = setTimeout(function(){
 
-          //   console.log(loadDataPromise);
-
-          //   loadDataPromise.reject('timeout ad');
+          //   // loadDataPromise.reject('timeout ad');
 
           //   player.trigger('ad:next');
 
