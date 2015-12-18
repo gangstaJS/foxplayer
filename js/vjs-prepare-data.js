@@ -1,6 +1,71 @@
 var snapshotPrerolls = [],
     unit;
 
+// ---
+
+var REQUEST_URL = 'http://inv-nets.admixer.net/fs/dsp.aspx';
+
+var requestJSON = {
+    "id":"", 
+    "imp": [
+    {
+      "id": "preroll1",
+      "video": {"id": "e3dbd002-ebd7-4488-8679-d74240554087", "pos": "1"},
+      "ext": {"pl": "preroll", "pos": "1", "ct": "adult"}
+    }, 
+
+    {
+      "id": "preroll2",
+      "video": {"id": "e3dbd002-ebd7-4488-8679-d74240554087", "pos": "1"},
+      "ext": {"pl": "preroll", "pos": "1", "ct": "adult"}
+    }, 
+
+    {
+      "id": "preroll3",
+      "video": {"id": "e3dbd002-ebd7-4488-8679-d74240554087", "pos": "1"},
+      "ext": {"pl": "preroll", "pos": "1", "ct": "adult"}
+    }, 
+
+    {
+      "id": "preroll4",
+      "video": {"id": "e3dbd002-ebd7-4488-8679-d74240554087", "pos": "1"},
+      "ext": {"pl": "preroll", "pos": "1", "ct": "adult"}
+    }, 
+
+    {
+      "id": "preroll5",
+      "video": {"id": "e3dbd002-ebd7-4488-8679-d74240554087", "pos": "1"},
+      "ext": {"pl": "preroll", "pos": "1", "ct": "adult"}
+    }, 
+
+    {
+      "id": "preroll6",
+      "video": {"id": "e3dbd002-ebd7-4488-8679-d74240554087", "pos": "1"},
+      "ext": {"pl": "preroll", "pos": "1", "ct": "adult"}
+    }, 
+
+    {
+      "id": "banner1",
+      "video": {"id": "42d66bb7-a534-49cc-abfe-c6a57965e8be", "pos": "1"},
+      "ext": {"pl": "banner", "pos": "1", "ct": "adult"}
+    }],
+
+    "ext": {
+        "maxVideoDurationSec":62,
+        "material": {
+            "id" :"MaZjNUTPUW7Hhpw3mRjoc", "year":"2015"
+        }
+    }
+};
+
+var requestData = {
+  callback: 'FJCaller',
+  _: (new Date()).getTime(),
+  data: JSON.stringify(requestJSON)
+};
+
+// ---
+
 !function(window, document, vjs, undefined) {
     "use strict";
 
@@ -20,7 +85,7 @@ var snapshotPrerolls = [],
         // ads controls 
         skipBtnEl,
         addClickLayerEl,
-        allowMimeTypes = ['video/ogg', 'video/mp4', 'video/webm', 'application/x-shockwave-flash'],
+        allowMimeTypes = ['video/ogg', 'video/mp4', 'video/webm', 'application/x-shockwave-flash', 'text/html'],
         loadDataPromise;
 
     function adsPreRolls(options) {
