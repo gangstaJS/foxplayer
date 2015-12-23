@@ -1,5 +1,5 @@
-var snapshotPrerolls = [],
-    unit;
+// var snapshotPrerolls = [],
+var unit, minuteBlockData = null, deferredMinuteBlock = null;
 
 // ---
 
@@ -59,7 +59,7 @@ var requestJSON = {
 };
 
 var requestData = {
-  callback: 'FJCaller',
+  callback: 'cbMixer',
   _: (new Date()).getTime(),
   data: JSON.stringify(requestJSON)
 };
@@ -98,9 +98,10 @@ var requestData = {
           settings.postrollTimeout = 0;
         }
 
-        PREROLLS_COUNT        = settings.pre.length;
         AFTER_PAUSROLLS_COUNT = settings.afterpaus.length;
         POST_ROLL_COUNT       = settings.post.length;
+
+        PREROLLS_COUNT = settings.isMinuteBlock ? 1 : settings.pre.length;
 
         $player = $(player.el());
         $videoEl = $('#' + player.id() + '_html5_api');
@@ -110,7 +111,7 @@ var requestData = {
 
         if(!PREROLLS_COUNT) setTimeout(player.trigger.bind(player, 'adtimeout'), 0);
 
-        snapshotPrerolls = settings.pre.slice();
+        // snapshotPrerolls = settings.pre.slice();
 
         player.controlBar.muteToggle.on('click', function() {
             if (state.adPlaying) {
@@ -138,11 +139,13 @@ var requestData = {
             } else {
                 player.trigger('AdError');
                 state.addErrors = 0;
-                sendCustomStat({
-                    id: statId(),
-                    e: 'err',
-                    type: statType()
-                });
+
+                // sendCustomStat({
+                //     id: statId(),
+                //     e: 'err',
+                //     type: statType()
+                // });
+
                 player.trigger('ad:next');
                 console.log('AdError');
             }
@@ -165,11 +168,13 @@ var requestData = {
         });
 
         player.on('contentupdate', function() {
-            if(!player.currentSrc()) requestAds(++ROLLS_PLAYED, PREROLLS_COUNT, true);
+            if(!player.currentSrc()) {
+              goAd();
+            }
         });
 
         if(player.currentSrc()) {
-            requestAds(++ROLLS_PLAYED, PREROLLS_COUNT, true);
+           goAd();
         }
 
         player.on('ad:next', function() {
@@ -201,6 +206,37 @@ var requestData = {
         player.on('contentended', playPostroll);
 
         // --
+
+    }
+
+    function goAd() {
+
+      requestMixerMinuteBlock(REQUEST_URL, requestData);
+
+      deferredMinuteBlock.then(function(res) {
+
+        var minuteRolls = [];
+
+        res.seatbid[0].bid.forEach(function(el,n) {
+
+          try{
+            
+            minuteRolls.push({isString: true, url: el.adm})
+
+          } catch(e) { console.warn(e.message); }
+
+        });
+
+        PREROLLS_COUNT = res.seatbid[0].bid.length;
+
+        settings.pre = minuteRolls;
+        
+
+        console.log(settings.pre);        
+
+        requestAds(++ROLLS_PLAYED, PREROLLS_COUNT, true);
+
+      });
 
     }
 
@@ -275,14 +311,14 @@ var requestData = {
 
     function isTimeForPreroll() {
       var lastAds = getCookie('lastAds') || 0;
-      return ((getUnix() - lastAds) >= periodAds) ? true : false;
+      return ((getUnix() - lastAds) >= periodAds); // ? true : false;
     }
 
     // --
 
     function isTimeForAfterPausroll() {
       var lastAds = getCookie('lastAfterPaus') || 0;
-      return ((getUnix() - lastAds) >= periodAfterPaus) ? true : false;
+      return ((getUnix() - lastAds) >= periodAfterPaus); // ? true : false;
     }
 
     // --
@@ -325,6 +361,7 @@ var requestData = {
 
           console.log('numRoll', numRoll, rollsConf);
           var curRollXmlUrl = rollsConf[numRoll-1].url;
+          var isString = rollsConf[numRoll-1].isString || false;
           state.prevRollMediaSrc = state.prevRollMediaSrc || '';
 
           // --
@@ -339,7 +376,7 @@ var requestData = {
 
           // --    
 
-          loadDataPromise = loadAdData(state.prevRollMediaSrc, curRollXmlUrl);
+          loadDataPromise = parseFullVAST(curRollXmlUrl, isString);
 
           loadDataPromise.then(function(res) {
 
@@ -347,19 +384,21 @@ var requestData = {
             
             // clearTimeout(intervalAdPlaying);
 
-            if( (res.nobanner && ((numRoll-1) <= 0)) ||
-                ((allowMimeTypes.indexOf(res.type) == -1) && ((numRoll-1) <= 0))
-            ) {
+            if(res.nobanner && (numRoll-1) <= 0) {
+              
               console.log('ad:next-with-first-play');
               player.trigger('ad:next-with-first-play');
               return;
-            } else if(res.nobanner && ((numRoll-1) > 0) || ((allowMimeTypes.indexOf(res.type) == -1) && ((numRoll-1) > 0)) ) {
+
+            } else if(res.nobanner && (numRoll-1) > 0) {
+              
               console.log('ad:next');
               player.trigger('ad:next');
               return;
+
             }
 
-            state.prevRollMediaSrc = res.src;
+            state.prevRollMediaSrc = res.media.src;
             state.adsMedia = res;           
 
             if(firstPlay) {
@@ -377,92 +416,19 @@ var requestData = {
           setTimeoutAds(numRoll, shouldShowAds);
           console.warn('ad:cancel');
 
-          // setTimeout нужен для afterpaus рола, так как не корректно востанавливалсь позиция тайм алйна;
+          // setTimeout нужен для afterpaus рола, так как не корректно востанавливалсь позиция таймлайна;
            setTimeout(player.trigger.bind(player, 'ad:cancel'), 0);
         }
     }
 
     function beforePlayAd() {
-      if (state.adsMedia.apiFramework == 'VPAID') {
+      console.log('state.adsMedia', state.adsMedia);
+
+      if (state.adsMedia.media.apiFramework == 'VPAID') {
           playVPAIDAd();
       } else {
           playAd();
       }
-    }
-
-
-    function loadAdData(prevSrc, vastXmlUrl) {
-      var deffer = $.Deferred();
-
-      var d = parseFullVAST(vastXmlUrl);
-
-      d.then(then);
-
-      function then(data) {
-        if(data.nobanner) {
-          sendCustomStat({
-              id: statId(),
-              e: 'load',
-              type: statType()
-          });
-
-          sendCustomStat({
-                id: statId(),
-                e: 'nobanner',
-                type: statType()
-          });
-
-          deffer.resolve({nobanner: true});
-          predictionCount = 3;
-        } else {
-
-          if(prevSrc == data.src && (predictionCount > 0)) {
-            predictionCount--;
-            
-            d = parseFullVAST(vastXmlUrl);
-
-            sendCustomStat({
-                id: statId(),
-                e: 'repeat',
-                src1: prevSrc,
-                src2: data.src,
-                type: statType()
-            });
-
-            sendCustomStat({
-                id: statId(),
-                e: 'load',
-                type: statType()
-            });
-
-            d.then(then);
-
-          } else if(prevSrc == data.src && (predictionCount <= 0)) {
-            sendCustomStat({
-                id: statId(),
-                e: 'load',
-                type: statType()
-            });
-
-            deffer.resolve({nobanner: true});
-            predictionCount = 3;
-
-          } else {
-            sendCustomStat({
-                  id: statId(),
-                e: 'load',
-                type: statType()
-            });
-
-            deffer.resolve(data);
-            predictionCount = 3;
-          }
-        }
-
-      }
-
-      return deffer.promise();
-
     }
 
     // detect flash follback
@@ -485,8 +451,8 @@ var requestData = {
         
 
         player.pl._setVideoSource({
-            type: state.adsMedia.type,
-            src: state.adsMedia.src
+            type: state.adsMedia.media.type,
+            src: state.adsMedia.media.src
         });
 
         player.one('adloadedmetadata', function() {
@@ -543,7 +509,23 @@ var requestData = {
 
         state.adPlaying = true;
 
-        state.flashVPaid = new VPAIDFLASHClient(state.$VPAIDContainer.get(0), flashVPAIDWrapperLoaded);
+         if(state.adsMedia.media.type == 'text/html') {
+
+          state.htmlVPaid = new VPAIDHTML5Client(state.$VPAIDContainer.get(0), $videoEl.get(0), {});
+
+          state.htmlVPaid.loadAdUnit(state.adsMedia.media.src, onLoad);
+
+          function onLoad(err, adUnit) {
+            if (err) return;
+            console.log('adUnit', adUnit);
+          }
+
+
+         } else if(state.adsMedia.media.type == 'application/x-shockwave-flash'){
+          
+          state.flashVPaid = new VPAIDFLASHClient(state.$VPAIDContainer.get(0), flashVPAIDWrapperLoaded);
+
+         }       
 
     }
 
@@ -567,114 +549,23 @@ var requestData = {
     // --
 
 
-    function parseFullVAST(url) {
+    function parseFullVAST(url, isString) {
 
-        var defer = $.Deferred();
+      // var defer = $.Deferred();
 
-        vastRequest(url).promise().then(function(xml) {
-            var $vast = $(xml),
-                VASTAdTagURI = '',
-                defferd;
+      state.$VPAIDContainer = $player.find('#vjs-vpaid-container');
 
-            if($vast.find('nobanner').length) {
-              console.log('%c </nobanner>', 'font-size: 20px');
-              defer.resolve({nobanner: true});
-            } else {
+       if (!state.$VPAIDContainer.length) {
+           state.$VPAIDContainer = $('<div>', {
+               id: 'vjs-vpaid-container'
+           });
+           $player.append(state.$VPAIDContainer);
+       }
+      
 
-              var data = {
-                  // vastExtensions: [],
-                  // vastEvents: [],
-                  vastClickThrough: [],
-                  vastImpression: [],
-                  playerError: [],
-  
-                  type: '',
-                  src: '',
-                  apiFramework: '',
-                  width: 0,
-                  height: 0
-              };
-  
-              data = mergeVastRes(data, $vast);
-  
-              var hasWrapper = $vast.find('Ad Wrapper').length ? 1 : 0;
-  
-              if (hasWrapper) {
-                  var VASTAdTagURI = $vast.find('Ad Wrapper VASTAdTagURI').text();
-  
-                  console.log('%c HAS FIRST WRAPPER '+ VASTAdTagURI, 'font-size: 18px; color: blue');
-  
-                  vastRequest(VASTAdTagURI, {
-                      withCredentials: false
-                  }).promise().then(function(vastXml) {
-                      var $vastInWrapper = $(vastXml);
-  
-                      if($vastInWrapper.find('nobanner').length) {
-                        console.log('%c </nobanner>', 'font-size: 20px');
-                        defer.resolve({nobanner: true});
-                        
-                        // return defer.promise();
-                      }
-  
-                      data = mergeVastRes(data, $vastInWrapper);
-  
-                      var hasWrapperSecond = $vastInWrapper.find('Ad Wrapper').length ? 1 : 0;
-  
-                      if (hasWrapperSecond) {
-  
-                          var VASTAdTagURISecond = $vastInWrapper.find('Ad Wrapper VASTAdTagURI').text();
-  
-                          console.log('%c HAS SECOND WRAPPER '+ VASTAdTagURISecond, 'font-size: 18px; color: blue');
-  
-                          vastRequest(VASTAdTagURISecond, {
-                              withCredentials: false
-                          }).promise().then(function(vastXml) {
-                              var $vastInWrapperSecond = $(vastXml);
-  
-                              if($vastInWrapperSecond.find('nobanner').length) {
-                                console.log('%c </nobanner>', 'font-size: 20px');
-                                defer.resolve({nobanner: true});                                
-                                 // return defer.promise();
-                              }
-  
-                              data = mergeVastRes(data, $vastInWrapperSecond);
-  
-                              state.$VPAIDContainer = $player.find('#vjs-vpaid-container');
-                              if (!state.$VPAIDContainer.length) {
-                                  state.$VPAIDContainer = $('<div>', {
-                                      id: 'vjs-vpaid-container'
-                                  });
-                                  $player.append(state.$VPAIDContainer);
-                              }
-  
-                              defer.resolve(data);
-  
-                          });
-                      } else {
-  
-                        state.$VPAIDContainer = $player.find('#vjs-vpaid-container');
-                        if (!state.$VPAIDContainer.length) {
-                            state.$VPAIDContainer = $('<div>', {
-                                id: 'vjs-vpaid-container'
-                            });
-                            $player.append(state.$VPAIDContainer);
-                        }
-                        console.log('NOT second wrapper');
-                        defer.resolve(data);
-                      }
-  
-                  });
-  
-  
-              } else {
-                defer.resolve(data);
-              }
+      // return defer.promise();
 
-            } // 
-
-        });
-
-        return defer.promise();
+      return vtj(url, isString);
 
     }
 
@@ -780,87 +671,6 @@ var requestData = {
     }
 
     // --
-
-    function getVastDataBlock(obj, elems, attr) {
-        // var ext = {};
-        console.log('getVastDataBlock', arguments);
-        elems.each(function(n, el) {
-            var val = $(this).text();
-
-            if(obj[$(this).attr(attr)] && (attr == 'event')) {
-              obj[$(this).attr(attr)].push( (isFinite(val) ? parseInt(val) : val) );
-            } else {
-              obj[$(this).attr(attr)] = [ (isFinite(val) ? parseInt(val) : val) ];
-            }
-        });
-
-        return obj;
-    }
-
-    function mergeVastTags(arr, data) {
-      data = data || '';
-      data = data.trim();
-
-      if(!data.length) return arr;
-
-      if(Object.prototype.toString.call(arr) === '[object Array]') {
-        arr.push(data);
-      } else {
-        arr = [data];
-      }
-
-      return arr;
-    }
-
-    // --
-
-    function mergeVastRes(data, $vast) {
-
-      var $mediaFiles = $vast.find('MediaFiles MediaFile'), media = $();
-
-      if ($mediaFiles.length) {
-
-        $mediaFiles.each(function(n,el) {
-          var mediaType = $(this).attr('type');
-
-          if(($videoEl.get(0).canPlayType( mediaType ) == 'maybe') ||
-            ($videoEl.get(0).canPlayType( mediaType ) == 'probably') ||
-            (mediaType == 'application/x-shockwave-flash') // vpaid
-          ) {
-
-            console.log('mediaType', mediaType);
-
-            media = $(this);
-            return false;
-
-          }
-        });
-
-        data.type = media.attr('type'),
-        data.src = media.text(),
-        data.apiFramework = media.attr('apiFramework'),
-        data.width = media.attr('width'),
-        data.height = media.attr('height');
-
-      }
-    
-      var $clickThrough = $vast.find('VideoClicks ClickThrough');
-      
-      if($clickThrough.length) {
-        data.vastClickThrough = [$vast.find('VideoClicks ClickThrough').text()];
-      }
-
-      data.vastClickThrough = mergeVastTags(data.vastClickThrough, $vast.find('VideoClicks ClickTracking').text()); 
-      data.vastImpression = mergeVastTags(data.vastImpression, $vast.find('Impression').text());
-      data.playerError = mergeVastTags(data.playerError,  $vast.find('Error').text());   
-
-      data.vastExtensions = getVastDataBlock((data.vastExtensions || {}), $vast.find('Extensions Extension'), 'type');    
-      data.vastEvents = getVastDataBlock((data.vastEvents || {}), $vast.find('TrackingEvents Tracking'), 'event');
-
-
-      return data;
-    }
-
 
     function initAdsControls() {
         try {
@@ -1065,8 +875,28 @@ var requestData = {
       return navigator.userAgent.indexOf("Safari") > -1;
     }
 
+    // -- admixer
+
+    function requestMixerMinuteBlock(url, param) {
+      deferredMinuteBlock = $.Deferred();
+
+      return $.ajax({
+        url: url,
+        type: 'get',
+        dataType: 'script',
+        data: param
+      });
+    }
+
+    // ---
 
     vjs.plugin('adsPreRolls', adsPreRolls);
 
 
 }(window, document, videojs);
+
+
+
+function cbMixer(admpresp) {
+  deferredMinuteBlock.resolve(admpresp);
+}

@@ -6,20 +6,19 @@
 	
 
 	var sendEvent = function(urlsArr) {
-		// var xhrFields = {withCredentials: true};
+		var xhrFields = {withCredentials: false};
 
 		$.each(urlsArr, function(n,url){			
 			$.ajax({
 				url:url, 
 				type:'get', 
-				dataType:'text'
+				dataType:'text',
+				xhrFields: xhrFields
 			});
 		});
 	};
 
-	// --
-
-		
+	// --		
 
 	function vastEventsTracking() {
 		player = this;
@@ -72,7 +71,7 @@
 		};
 
 		player.adsvast.AdClickThrough = function() {
-			window.open(eventStat.vastClickThrough[0]);
+			window.open(eventStat.vastClickThrough);
 			sendEvent(eventStat.addClick);
 			console.log('%c AdClickThrough', style);
 		};

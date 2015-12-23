@@ -47,27 +47,29 @@ function initPlayer(node, conf, startIndex) {
 
 		me.storage = null;
 
-		// conf.adsOptions.pre = [
-		// 	// {url: 'ads.xml'},
-		// 	// {url: 'ads_nobanner.xml'},
+		conf.adsOptions.isMinuteBlock = true;
+
+		conf.adsOptions.pre = [
+			// {url: 'ads.xml'},
+			// {url: 'ads_nobanner.xml'},
 			
 			
-		// 	// {url: 'http://ads.adfox.ru/175105/getCode?p1=beygm&p2=emxn&pfc=a&pfb=a&plp=a&pli=a&pop=a'},
-		// 	{url: 'https://oz.foxis.org/ads.php'},
-		// 	{url: 'http://ads.adfox.ru/175105/getCode?p1=beygm&p2=emxn&pfc=a&pfb=a&plp=a&pli=a&pop=a'},
-		// 	// {url: 'ads2.xml'},
-		// 	// {url: 'ads2.xml'}
-		// ];
+			{url: 'http://inv-nets.admixer.net/dsp.aspx?rct=3&zone=b6f2f9a5-0ae3-439d-a494-65e8b4cff076&zoneInt=8362&sect=2166&site=2030&rnd=763821163'},
+			// {url: 'https://oz.foxis.org/ads.php'},
+			// {url: 'http://ads.adfox.ru/175105/getCode?p1=beygm&p2=emxn&pfc=a&pfb=a&plp=a&pli=a&pop=a'},
+			// {url: 'http://inv-nets.admixer.net/dsp.aspx?rct=3&zone=94e7c35f-3fc5-4e3a-97c0-c69b0f1c769a&zoneInt=8839&sect=2009&site=1559&rnd=824260880'},
+			// {url: 'ads2.xml'}
+		];
 
-		// conf.adsOptions.afterpaus = [
-		// 	{url: 'ads.xml'},
-		// 	// {url: 'ads_wrapper.xml'}
-		// ];
+		conf.adsOptions.afterpaus = [
+			{url: 'ads.xml'},
+			// {url: 'ads_wrapper.xml'}
+		];
 
-		// conf.adsOptions.post = [
-		// 	{url: 'ads.xml'},
-		// 	// {url: 'ads_wrapper.xml'}
-		// ];
+		conf.adsOptions.post = [
+			{url: 'ads.xml'},
+			// {url: 'ads_wrapper.xml'}
+		];
 
 		me.playerState();
 
