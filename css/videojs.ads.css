@@ -14,3 +14,14 @@
 .vjs-ad-playing.vjs-ad-loading .vjs-loading-spinner {
   display: block;
 }
+
+.vjs-ads-duration {
+	color: #fff;
+    font-size: 14px;
+    position: absolute;
+    background-color: rgba(255, 228, 0, .9);
+    border-radius: 3px;
+    right: 10px;
+    top: 10px;
+    padding: 7px 20px;
+}

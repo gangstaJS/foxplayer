@@ -42,12 +42,6 @@ var requestJSON = {
       "id": "preroll6",
       "video": {"id": "e3dbd002-ebd7-4488-8679-d74240554087", "pos": "1"},
       "ext": {"pl": "preroll", "pos": "1", "ct": "adult"}
-    }, 
-
-    {
-      "id": "banner1",
-      "video": {"id": "42d66bb7-a534-49cc-abfe-c6a57965e8be", "pos": "1"},
-      "ext": {"pl": "banner", "pos": "1", "ct": "adult"}
     }],
 
     "ext": {
@@ -82,8 +76,11 @@ var requestData = {
 
         ROLLS_PLAYED = 0,
 
+        PREV_ADS_MINUTEBLOCK_DURATION = 0,
+
         // ads controls 
         skipBtnEl,
+        adTiming,
         addClickLayerEl,
         allowMimeTypes = ['video/ogg', 'video/mp4', 'video/webm', 'application/x-shockwave-flash', 'text/html'],
         loadDataPromise;
@@ -209,6 +206,8 @@ var requestData = {
 
     }
 
+
+    // start minute block
     function goAd() {
 
       requestMixerMinuteBlock(REQUEST_URL, requestData);
@@ -674,16 +673,37 @@ var requestData = {
 
     function initAdsControls() {
         try {
+
             skipBtnEl = $('<div>', {
                 'class': 'vjs-ads-skip-btn vjs-ads-auto-create'
             });
+
             skipBtnEl.text('Пропустить>>');
+
             player.el().appendChild(skipBtnEl.get(0));
 
             addClickLayerEl = $('<div>', {
                 'class': 'vjs-ads-click-layer vjs-ads-auto-create'
             });
+
+            // --
+
+            if(state.currentTypeRoll == 'PRE-ROLL') {
+
+              adTiming = $('<div>', {
+                'class': 'vjs-ads-duration vjs-ads-auto-create',
+                'text': 'Реклама'
+              });
+
+              PREV_ADS_MINUTEBLOCK_DURATION = state.adsMedia.media.duration + PREV_ADS_MINUTEBLOCK_DURATION;
+
+              player.el().appendChild(adTiming.get(0));
+            }
+
+            // --
+
             player.el().appendChild(addClickLayerEl.get(0));
+
         } catch (e) {
             console.warn('skipBtnEl', skipBtnEl);
             console.warn('addClickLayerEl', addClickLayerEl);
@@ -773,6 +793,24 @@ var requestData = {
         if ((percenr >= 75) && state.thirdQuartile) {
             state.thirdQuartile = false;
             player.trigger('AdThirdQuartile');
+        }
+
+
+        // --
+
+        var dur = state.adsMedia.media.duration;
+
+        var cur = Math.floor(player.currentTime());
+
+        if(state.currentTypeRoll == 'PRE-ROLL') {
+          adTiming.text('Реклама '+ 
+            (60 - 
+              (
+                PREV_ADS_MINUTEBLOCK_DURATION - dur + cur
+              )
+            )
+
+          );
         }
     }
 

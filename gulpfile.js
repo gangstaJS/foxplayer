@@ -11,6 +11,7 @@ var vjsFiles = [
     './js/test.js',
     './js/video.js',
     './js/vjs-state.js', 
+    './js/videojs.ga.js', 
   	'./js/vjs-playlist.js', 
   	'./js/vjs-hotkeys.js', 
   	'./js/vjs-progress-tooltip.js', 
