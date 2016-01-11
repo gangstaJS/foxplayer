@@ -981,15 +981,15 @@ var snapshotPrerolls = [],
     }
 
     function sendCustomStat(params) {
-        $.ajax({
-            url: 'http://213.133.191.35:8007/stat3',
-            type: 'POST',
-            dataType: 'text',
-            data: params,
-            success: function(res) {
-                console.log('Custom stat', res);
-            }
-        });
+        // $.ajax({
+        //     url: 'http://213.133.191.35:8007/stat3',
+        //     type: 'POST',
+        //     dataType: 'text',
+        //     data: params,
+        //     success: function(res) {
+        //         console.log('Custom stat', res);
+        //     }
+        // });
     }
 
     function isMobileSafari() {
