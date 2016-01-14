@@ -210,32 +210,43 @@ var requestData = {
     // start minute block
     function goAd() {
 
-      requestMixerMinuteBlock(REQUEST_URL, requestData);
+      if(settings.isMinuteBlock) {
 
-      deferredMinuteBlock.then(function(res) {
+        requestMixerMinuteBlock(REQUEST_URL, requestData);
 
-        var minuteRolls = [];
-
-        res.seatbid[0].bid.forEach(function(el,n) {
-
-          try{
-            
-            minuteRolls.push({isString: true, url: el.adm})
-
-          } catch(e) { console.warn(e.message); }
-
+        deferredMinuteBlock.then(function(res) {
+  
+          var minuteRolls = [];
+  
+          // admpresp={"status":"no data", "msg":""}
+          if(res.status == 'no data') return;
+  
+          res.seatbid[0].bid.forEach(function(el,n) {
+  
+            try{
+              
+              minuteRolls.push({isString: true, url: el.adm})
+  
+            } catch(e) { console.warn(e.message); }
+  
+          });
+  
+          PREROLLS_COUNT = res.seatbid[0].bid.length;
+  
+          settings.pre = minuteRolls;
+          
+  
+          console.log('settings.pre', settings.pre);        
+  
+          requestAds(++ROLLS_PLAYED, PREROLLS_COUNT, true);
+  
         });
 
-        PREROLLS_COUNT = res.seatbid[0].bid.length;
-
-        settings.pre = minuteRolls;
-        
-
-        console.log(settings.pre);        
+      } else {
 
         requestAds(++ROLLS_PLAYED, PREROLLS_COUNT, true);
 
-      });
+      }
 
     }
 
@@ -460,6 +471,7 @@ var requestData = {
             player.trigger('AdStart');
             player.removeClass('vjs-seeking');
 
+            destructAdsControls();
             initAdsControls();
 
             sendCustomStat({
@@ -688,7 +700,7 @@ var requestData = {
 
             // --
 
-            if(state.currentTypeRoll == 'PRE-ROLL') {
+            if(state.currentTypeRoll == 'PRE-ROLL' && settings.isMinuteBlock) {
 
               adTiming = $('<div>', {
                 'class': 'vjs-ads-duration vjs-ads-auto-create',
@@ -711,15 +723,16 @@ var requestData = {
         }
 
         try {
-          state.adsMedia.vastExtensions.skipTime = convertToSeconds(state.adsMedia.vastExtensions.skipTime[0]);
+          state.adsMedia.vastExtensions.skipTime = state.adsMedia.media.duration > 10 ? 5 : 0;
+
+          // state.adsMedia.vastExtensions.skipTime = convertToSeconds(state.adsMedia.vastExtensions.skipTime);
           
-          if (state.adsMedia.vastExtensions.skipButton[0]) { // проверяем разрешен ли скип рекламы.
+          if (state.adsMedia.vastExtensions.skipButton) { // проверяем разрешен ли скип рекламы.
               if (state.adsMedia.vastExtensions.skipTime <= 0) { // показать скип кнопку сразу
                   skipBtnEl.css('display', 'block');
               } else {
                   player.on('timeupdate', checkSkip);
-              }
-  
+              }  
   
               player.on(skipBtnEl.get(0), 'click', skipAds);
   
@@ -732,17 +745,17 @@ var requestData = {
         }
 
         if(!state.adsMedia.vastExtensions.linkTxt) {
-          state.adsMedia.vastExtensions.linkTxt = ['Перейти на сайт рекламодателя'];
+          state.adsMedia.vastExtensions.linkTxt = 'Перейти на сайт рекламодателя';
         }
 
         if(!state.adsMedia.vastExtensions.isClickable) {
-          state.adsMedia.vastExtensions.isClickable = [1];
+          state.adsMedia.vastExtensions.isClickable = 1;
         }
 
         try {
           // проверяем кликабельный ли видео элемент рекламы
-          if (state.adsMedia.vastExtensions.isClickable[0]) {
-              addClickLayerEl.html(state.adsMedia.vastExtensions.linkTxt[0]);
+          if (state.adsMedia.vastExtensions.isClickable) {
+              addClickLayerEl.html(state.adsMedia.vastExtensions.linkTxt);
               player.on(addClickLayerEl.get(0), 'click', clickThrough);
           } else {
               console.info('isClickable disable');
@@ -802,14 +815,15 @@ var requestData = {
 
         var cur = Math.floor(player.currentTime());
 
-        if(state.currentTypeRoll == 'PRE-ROLL') {
-          adTiming.text('Реклама '+ 
-            (60 - 
-              (
-                PREV_ADS_MINUTEBLOCK_DURATION - dur + cur
-              )
+        if(state.currentTypeRoll == 'PRE-ROLL' && settings.isMinuteBlock) {
+          var res = (60 - 
+            (
+              PREV_ADS_MINUTEBLOCK_DURATION - dur + cur
             )
+          );
 
+          adTiming.text('Реклама '+ 
+            (res ? res: 0)
           );
         }
     }
@@ -827,7 +841,7 @@ var requestData = {
     function skipAds() {
         skipBtnEl.remove();
         
-        player.off('timeupdate', checkSkip);
+        // player.off('timeupdate', checkSkip);
 
         player.trigger('AdSkiped');
         
@@ -894,15 +908,15 @@ var requestData = {
     }
 
     function sendCustomStat(params) {
-        $.ajax({
-            url: 'http://213.133.191.35:8007/stat3',
-            type: 'POST',
-            dataType: 'text',
-            data: params,
-            success: function(res) {
-                console.log('Custom stat', res);
-            }
-        });
+        // $.ajax({
+        //     url: 'http://213.133.191.35:8007/stat3',
+        //     type: 'POST',
+        //     dataType: 'text',
+        //     data: params,
+        //     success: function(res) {
+        //         console.log('Custom stat', res);
+        //     }
+        // });
     }
 
     function isMobileSafari() {

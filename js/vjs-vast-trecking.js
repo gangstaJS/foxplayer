@@ -6,6 +6,8 @@
 	
 
 	var sendEvent = function(urlsArr) {
+		if(typeof urlsArr == 'string') urlsArr = [urlsArr];
+		
 		var xhrFields = {withCredentials: false};
 
 		$.each(urlsArr, function(n,url){			
