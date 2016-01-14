@@ -8,15 +8,33 @@
 	var sendEvent = function(urlsArr) {
 		if(typeof urlsArr == 'string') urlsArr = [urlsArr];
 		
-		var xhrFields = {withCredentials: false};
+		var xhrFields = {withCredentials: false}, $body = $('body');
 
 		$.each(urlsArr, function(n,url){			
-			$.ajax({
-				url:url, 
-				type:'get', 
-				dataType:'text',
-				xhrFields: xhrFields
+			// $.ajax({
+			// 	url:url, 
+			// 	type:'get', 
+			// 	dataType:'text',
+			// 	xhrFields: xhrFields
+			// });
+
+			var $img = $('<img/>', {
+				style:'width: 1px; height: 1px; border: 0;', 
+				src:url, 
+				alt:'trecking img'
 			});
+
+			console.log('img tracking', url);
+
+			$body.append($img);
+			
+			(function($i) {
+				setTimeout(function() {
+					$i.remove();
+				},3000);
+			})($img);
+
+			
 		});
 	};
 

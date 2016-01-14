@@ -89,7 +89,7 @@ function initPlayer(node, conf, startIndex) {
 
 		// google an. for player
 		me.ga({
-			debug: true
+			debug: false
 		});
 
 		// me.playerState();
