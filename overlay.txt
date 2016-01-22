@@ -1,0 +1,16 @@
+overlay
+
+это тянущийся, заведенный через зону
+http://inv-nets.admixer.net/dsp.aspx?rct=3&nl=1&zone=2b566712-ab97-4968-b5bb-81b1be57bb01&zoneInt=9076&sect=2009&site=1559&rnd=1608732553
+
+
+нетянущийся с зоной
+http://inv-nets.admixer.net/dsp.aspx?rct=3&nl=1&zone=ccba33f3-e274-4136-97f0-795f78654738&zoneInt=9077&sect=2009&site=1559&rnd=1165877332
+
+если с врапером, то можно пока так: 
+http://inv-nets.admixer.net/dsp.aspx?rct=3&zone=7eba9c9f-a58f-42b7-94a4-323a86e6fd4c&zoneInt=9083&sect=2009&site=1559&rnd=1694537367
+
+
+wow-roll
+
+http://inv-nets.admixer.net/dsp.aspx?rct=3&zone=1874abbc-5470-471a-9480-54b9c5cba17c&zoneInt=8883&sect=2009&site=1559&rnd=736270956

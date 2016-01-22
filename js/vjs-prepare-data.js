@@ -522,14 +522,76 @@ var requestData = {
 
          if(state.adsMedia.media.type == 'text/html') {
 
-          state.htmlVPaid = new VPAIDHTML5Client(state.$VPAIDContainer.get(0), $videoEl.get(0), {});
+          // state.htmlVPaid = new VPAIDHTML5Client(state.$VPAIDContainer.get(0), $videoEl.get(0), {});
 
-          state.htmlVPaid.loadAdUnit(state.adsMedia.media.src, onLoad);
+          // state.htmlVPaid.loadAdUnit(state.adsMedia.media.src, onLoad);
 
-          function onLoad(err, adUnit) {
-            if (err) return;
-            console.log('adUnit', adUnit);
-          }
+          // function onLoad(err, adUnit) {
+          //   if (err) return;
+          //   console.log('adUnit', adUnit);
+          // }
+
+          var opt = {
+            skipTime: 3, 
+            adURL: state.adsMedia.vastClickThrough, 
+            debug: true, 
+            type: state.adsMedia.media.type
+          };
+
+          VPAIDHTML5mixer(state.adsMedia.media.src, player, '.vpaidContainer', opt)
+          .then(function(unit) {
+            // unit = unit;
+            player.trigger('adsready');
+
+            unit.on('AdStart', function(e) {
+              player.trigger('AdStart');
+              player.trigger('AdCreativeView');
+              player.trigger('AdImpression');
+            });
+
+            player.trigger('AdSkiped');
+
+            unit.on('AdComplete', function(e) {
+              player.trigger('AdComplete');
+              player.trigger('ad:next');
+            });
+    
+            unit.on('AdComplete', function(e) {
+              player.trigger('AdComplete');
+              player.trigger('ad:next');
+            });
+  
+            unit.on('AdSkipped',  function(e) {
+              player.trigger('AdSkiped');
+              player.trigger('ad:next');
+            });
+
+            unit.on('AdClickThrough',  function(e) {
+              clickThrough();
+              player.trigger('ad:next');
+            });
+  
+            unit.on('AdStopped',  function(e) {
+              player.trigger('ad:next');
+            });
+
+            unit.on('AdFirstQuartile',  function(e) {
+              player.trigger('AdFirstQuartile');
+            });
+
+            unit.on('AdMidpoint',  function(e) {
+              player.trigger('AdMidpoint');
+            });
+
+            unit.on('AdThirdQuartile',  function(e) {
+              player.trigger('AdThirdQuartile');
+            });
+
+            unit.on('AdError',  function(e) {
+              player.trigger('AdError');
+            });
+          
+          });   
 
 
          } else if(state.adsMedia.media.type == 'application/x-shockwave-flash'){
@@ -606,11 +668,11 @@ var requestData = {
             adUnit.on('AdVideoStart', function(err, result) {
                 player.trigger('AdStart');
 
-                sendCustomStat({
-                    id: statId(),
-                    e: 'start',
-                    type: statType()
-                });
+                // sendCustomStat({
+                //     id: statId(),
+                //     e: 'start',
+                //     type: statType()
+                // });
             });
 
             adUnit.on('AdVideoComplete', function(err, result) {

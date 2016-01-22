@@ -6,6 +6,7 @@
 	
 
 	var sendEvent = function(urlsArr) {
+		if(urlsArr == undefined) return;
 		if(typeof urlsArr == 'string') urlsArr = [urlsArr];
 		
 		var xhrFields = {withCredentials: false}, $body = $('body');
