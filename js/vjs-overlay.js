@@ -68,22 +68,21 @@
 	}
 
 	function buildOverlay(media, clickURL, current) {
-		var $clickableLayer;
+		var $clickableLayer, cssParam;
 		var $close = $('<i/>', {'class': 'vjs-overlay-mixer-close', text: 'Закрыть'});
 		$overlayBlock = $('<div/>', {'class': 'vjs-overlay-mixer'});
 
-		if(media.scalable) {
-			$overlayBlock.css({
-				height: media.height+'px',
-			});
+		cssParam = {
+			height: media.height+'px',
+		};
 
+		if(media.scalable) {
 			$overlayBlock.addClass('vjs-overlay-is-scalable');
 		} else {
-			$overlayBlock.css({
-				width: media.width+'px',
-				height: media.height+'px',
-			});
+			cssParam.width = media.width+'px';
 		}
+
+		$overlayBlock.css(cssParam);
 
 		if(media.type == 'text/html') {
 			$clickableLayer = $('<div/>', {'class': 'vjs-overlay-clickable-layer'});
@@ -91,12 +90,18 @@
 			$overlayBlock.append($iframe);
 
 			$iframe.on('load', function() {
+				$overlayBlock.append($close);
 				player.trigger('ad:overlayLoad');
 			});
 		} else {
 			$clickableLayer = $('<img/>', {'class': 'vjs-overlay-clickable-layer', src: media.src, alt: 'overlay image'}); 
 			player.trigger('ad:overlayLoad');
+			$overlayBlock.append($close);
 		}
+
+		$overlayBlock.append($clickableLayer);
+
+		// --
 
 		$clickableLayer.on('click', function() {
 			window.open(clickURL);
@@ -108,7 +113,8 @@
 			player.trigger('ad:overlayClose');
 		});
 
-		$overlayBlock.append($clickableLayer, $close);
+		// --
+
 		$player.append($overlayBlock);
 	}
 
@@ -128,14 +134,7 @@
 		
 		var xhrFields = {withCredentials: false}, $body = $('body');
 
-		$.each(urlsArr, function(n,url){			
-			// $.ajax({
-			// 	url:url, 
-			// 	type:'get', 
-			// 	dataType:'text',
-			// 	xhrFields: xhrFields
-			// });
-
+		$.each(urlsArr, function(n,url){
 			var $img = $('<img/>', {
 				style:'width: 1px; height: 1px; border: 0;', 
 				src:url, 
