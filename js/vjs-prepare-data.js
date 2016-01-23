@@ -521,16 +521,6 @@ var requestData = {
         state.adPlaying = true;
 
          if(state.adsMedia.media.type == 'text/html') {
-
-          // state.htmlVPaid = new VPAIDHTML5Client(state.$VPAIDContainer.get(0), $videoEl.get(0), {});
-
-          // state.htmlVPaid.loadAdUnit(state.adsMedia.media.src, onLoad);
-
-          // function onLoad(err, adUnit) {
-          //   if (err) return;
-          //   console.log('adUnit', adUnit);
-          // }
-
           var opt = {
             skipTime: 3, 
             adURL: state.adsMedia.vastClickThrough, 
@@ -540,7 +530,6 @@ var requestData = {
 
           VPAIDHTML5mixer(state.adsMedia.media.src, player, '.vpaidContainer', opt)
           .then(function(unit) {
-            // unit = unit;
             player.trigger('adsready');
 
             unit.on('AdStart', function(e) {
@@ -590,14 +579,20 @@ var requestData = {
             unit.on('AdError',  function(e) {
               player.trigger('AdError');
             });
+
+            unit.on('AdMute', function() {
+                player.trigger('AdMute');
+            });
+  
+            unit.on('AdUnmute', function() {
+                player.trigger('AdUnmute');
+            });
           
-          });   
+          });
 
 
-         } else if(state.adsMedia.media.type == 'application/x-shockwave-flash'){
-          
+         } else if(state.adsMedia.media.type == 'application/x-shockwave-flash'){          
           state.flashVPaid = new VPAIDFLASHClient(state.$VPAIDContainer.get(0), flashVPAIDWrapperLoaded);
-
          }       
 
     }
@@ -623,9 +618,6 @@ var requestData = {
 
 
     function parseFullVAST(url, isString) {
-
-      // var defer = $.Deferred();
-
       state.$VPAIDContainer = $player.find('#vjs-vpaid-container');
 
        if (!state.$VPAIDContainer.length) {
@@ -634,12 +626,8 @@ var requestData = {
            });
            $player.append(state.$VPAIDContainer);
        }
-      
-
-      // return defer.promise();
 
       return vtj(url, isString);
-
     }
 
     function flashVPAIDWrapperLoaded(err, success) {
@@ -785,9 +773,11 @@ var requestData = {
         }
 
         try {
-          state.adsMedia.vastExtensions.skipTime = state.adsMedia.media.duration > 10 ? 5 : 0;
+          // state.adsMedia.vastExtensions.skipTime = state.adsMedia.media.duration > 10 ? 5 : 0;
 
-          // state.adsMedia.vastExtensions.skipTime = convertToSeconds(state.adsMedia.vastExtensions.skipTime);
+          state.adsMedia.vastExtensions.skipTime = convertToSeconds(state.adsMedia.vastExtensions.skipTime);
+
+          console.log('state.adsMedia.vastExtensions.skipTime', state.adsMedia.vastExtensions.skipTime);
           
           if (state.adsMedia.vastExtensions.skipButton) { // проверяем разрешен ли скип рекламы.
               if (state.adsMedia.vastExtensions.skipTime <= 0) { // показать скип кнопку сразу
@@ -885,7 +875,7 @@ var requestData = {
           );
 
           adTiming.text('Реклама '+ 
-            (res ? res: 0)
+            (res > 0 ? res: 0) + ' сек из 60 сек'
           );
         }
     }

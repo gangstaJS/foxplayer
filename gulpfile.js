@@ -19,7 +19,8 @@ var vjsFiles = [
   	'./js/vjs-vast-trecking.js',
   	'./js/videojs.ads.js',
   	'./js/vjs-prepare-data.js',  	
-  	'./js/vjs-start-foxplayer.js'
+  	'./js/vjs-start-foxplayer.js',
+    './js/vjs-overlay.js'
 ];
 
 

@@ -391,6 +391,7 @@ filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#40000000', e
 	right: 0; bottom: 100px;
 	cursor: pointer;
 	z-index: 10;
+	font-size: 13px;
 }
 
 /*.vjs-ad-playing .vjs-control-bar {

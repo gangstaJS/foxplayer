@@ -87,6 +87,15 @@ function initPlayer(node, conf, startIndex) {
 		// 	// {url: 'ads_wrapper.xml'}
 		// ];
 
+		conf.adsOptions.overlay = [
+			// scalable
+			{url: 'http://inv-nets.admixer.net/dsp.aspx?rct=3&nl=1&zone=2b566712-ab97-4968-b5bb-81b1be57bb01&zoneInt=9076&sect=2009&site=1559&rnd=1608732553'},
+			
+			// non scalable
+			{url: 'http://inv-nets.admixer.net/dsp.aspx?rct=3&nl=1&zone=ccba33f3-e274-4136-97f0-795f78654738&zoneInt=9077&sect=2009&site=1559&rnd=1165877332'},
+			// {url: 'http://inv-nets.admixer.net/dsp.aspx?rct=3&nl=1&zone=2b566712-ab97-4968-b5bb-81b1be57bb01&zoneInt=9076&sect=2009&site=1559&rnd=1608732553'},		
+		];
+
 		// google an. for player
 		me.ga({
 			debug: false
@@ -301,6 +310,10 @@ function initPlayer(node, conf, startIndex) {
 
 		if(conf.adsOptions.afterpaus.length || conf.adsOptions.pre.length) {
 			me.adsPreRolls(conf.adsOptions);
+		}
+
+		if(conf.adsOptions.overlay.length) {
+			me.overlay(conf.adsOptions.overlay);
 		}
 
 
