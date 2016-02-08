@@ -27,7 +27,7 @@
 		});
 
 		player.on('ad:overlayClose', function() {
-			sendEvent(currentOverlayData.vastEvents.close);
+			sendEvent(currentOverlayData.vastEvents.skip);
 		});
 		
 	}
@@ -51,6 +51,8 @@
 		vtj(urls[current-1].url).then(function(res) {
 			currentOverlayData = res;
 
+			if(res.nobanner) return;
+
 			console.log('overlay ' + (current-1)+ ' start', res);
 
 			startShow(res, current);
@@ -69,7 +71,7 @@
 
 	function buildOverlay(media, clickURL, current) {
 		var $clickableLayer, cssParam;
-		var $close = $('<i/>', {'class': 'vjs-overlay-mixer-close', text: 'Закрыть'});
+		var $close = $('<i/>', {'class': 'vjs-overlay-mixer-close', text: 'X'});
 		$overlayBlock = $('<div/>', {'class': 'vjs-overlay-mixer'});
 
 		cssParam = {
@@ -90,13 +92,13 @@
 			$overlayBlock.append($iframe);
 
 			$iframe.on('load', function() {
-				$overlayBlock.append($close);
+				setTimeout(function() { $overlayBlock.append($close); }, 1500);
 				player.trigger('ad:overlayLoad');
 			});
 		} else {
 			$clickableLayer = $('<img/>', {'class': 'vjs-overlay-clickable-layer', src: media.src, alt: 'overlay image'}); 
 			player.trigger('ad:overlayLoad');
-			$overlayBlock.append($close);
+			setTimeout(function() { $overlayBlock.append($close); }, 2000);
 		}
 
 		$overlayBlock.append($clickableLayer);

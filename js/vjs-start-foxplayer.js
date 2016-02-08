@@ -60,13 +60,14 @@ function initPlayer(node, conf, startIndex) {
 
 		// ----------------
 
-		conf.adsOptions.isMinuteBlock = false;
+		conf.adsOptions.isMinuteBlock = true;
 
 		conf.adsOptions.pre = [
+			// {url: 'http://inv-nets.admixer.net/dsp.aspx?rct=3&zone=08fddf89-6dbe-493a-b4a8-c581d762f47a&zoneInt=9155&sect=2166&site=2030&rnd=415833950'}, 
 			// {url: 'http://inv-nets.admixer.net/dsp.aspx?rct=3&zone=a118983a-6133-4728-b303-b1cf8a2dd618&zoneInt=8858&sect=2166&site=2030&rnd=931324853'},
 			// {url: 'ads.xml'},
 			// {url: 'ads_nobanner.xml'},
-			{url: 'http://inv-nets.admixer.net/dsp.aspx?rct=3&zone=1874abbc-5470-471a-9480-54b9c5cba17c&zoneInt=8883&sect=2009&site=1559&rnd=736270956'},
+			// {url: 'http://inv-nets.admixer.net/dsp.aspx?rct=3&zone=1874abbc-5470-471a-9480-54b9c5cba17c&zoneInt=8883&sect=2009&site=1559&rnd=736270956'},
 			
 			// {url: 'http://inv-nets.admixer.net/dsp.aspx?rct=3&zone=b6f2f9a5-0ae3-439d-a494-65e8b4cff076&zoneInt=8362&sect=2166&site=2030&rnd=763821163'},
 			// {url: 'https://oz.foxis.org/ads.php'},
@@ -87,14 +88,18 @@ function initPlayer(node, conf, startIndex) {
 		// 	// {url: 'ads_wrapper.xml'}
 		// ];
 
-		conf.adsOptions.overlay = [
-			// scalable
-			{url: 'http://inv-nets.admixer.net/dsp.aspx?rct=3&nl=1&zone=2b566712-ab97-4968-b5bb-81b1be57bb01&zoneInt=9076&sect=2009&site=1559&rnd=1608732553'},
+		// conf.adsOptions.overlay = [
+		// 	{url: 'http://inv-nets.admixer.net/dsp.aspx?rct=3&nl=1&zone=4f542717-f910-4b8f-a83b-000bd9c0bce3&zoneInt=9110&sect=2166&site=2030&rnd=818098871'},
+		// 	// img
+		// 	// {url: 'http://inv-nets.admixer.net/dsp.aspx?rct=3&nl=1&zone=2c2cce23-1ab1-4ac0-822d-34c54fe15e52&zoneInt=9120&sect=2009&site=1559&rnd=767532985'},
+
+		// 	// scalable
+		// 	// {url: 'http://inv-nets.admixer.net/dsp.aspx?rct=3&nl=1&zone=2b566712-ab97-4968-b5bb-81b1be57bb01&zoneInt=9076&sect=2009&site=1559&rnd=1608732553'},
 			
-			// non scalable
-			{url: 'http://inv-nets.admixer.net/dsp.aspx?rct=3&nl=1&zone=ccba33f3-e274-4136-97f0-795f78654738&zoneInt=9077&sect=2009&site=1559&rnd=1165877332'},
-			// {url: 'http://inv-nets.admixer.net/dsp.aspx?rct=3&nl=1&zone=2b566712-ab97-4968-b5bb-81b1be57bb01&zoneInt=9076&sect=2009&site=1559&rnd=1608732553'},		
-		];
+		// 	// non scalable
+		// 	// {url: 'http://inv-nets.admixer.net/dsp.aspx?rct=3&nl=1&zone=ccba33f3-e274-4136-97f0-795f78654738&zoneInt=9077&sect=2009&site=1559&rnd=1165877332'},
+		// 	// {url: 'http://inv-nets.admixer.net/dsp.aspx?rct=3&nl=1&zone=2b566712-ab97-4968-b5bb-81b1be57bb01&zoneInt=9076&sect=2009&site=1559&rnd=1608732553'},		
+		// ];
 
 		// google an. for player
 		me.ga({
@@ -268,11 +273,19 @@ function initPlayer(node, conf, startIndex) {
     	var svgAnim = $playBtn.find('svg animate');
 
 		me.on('play', function() {
-			svgAnim.attr(pausObj).get(0).beginElement();
+			try {
+				svgAnim.attr(pausObj).get(0).beginElement();
+			} catch(e) {
+				console.log(e.message);
+			}
 		});
 
 		me.on('pause', function() {
-			svgAnim.attr(playObj).get(0).beginElement();
+			try {
+				svgAnim.attr(playObj).get(0).beginElement();
+			} catch(e) {
+				console.log(e.message);
+			}
 		});
 
 		// me.on('setcontent', function() {

@@ -25,8 +25,6 @@
 				alt:'trecking img'
 			});
 
-			console.log('img tracking', url);
-
 			$body.append($img);
 			
 			(function($i) {
@@ -88,6 +86,7 @@
 
 		player.adsvast.AdSkiped = function() {
 			sendEvent(eventStat.vastExtensions.skipAd);
+			sendEvent(eventStat.vastEvents.skip);
 			console.log('%c AdSkiped', style);
 		};
 
@@ -100,16 +99,19 @@
 		player.adsvast.AdImpression = function() {
 			sendEvent(eventStat.vastImpression);
 			console.log('%c AdImpression', style);
+			console.log(eventStat.vastImpression);
 		};
 
 		player.adsvast.AdCreativeView = function() {
 			sendEvent(eventStat.vastEvents.creativeView);
 			console.log('%c AdCreativeView', style);
+			console.log(eventStat.vastEvents.creativeView)
 		};
 
 		player.adsvast.AdStart = function() {
 			sendEvent(eventStat.vastEvents.start);
 			console.log('%c AdStart', style);
+			console.log(eventStat.vastEvents.start);
 		};
 
 		player.adsvast.AdUnmute = function() {

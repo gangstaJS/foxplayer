@@ -10,7 +10,7 @@ var requestJSON = {
     "imp": [
     {
       "id": "preroll1",
-      "video": {"id": "b6f2f9a5-0ae3-439d-a494-65e8b4cff076", "pos": "1"},
+      "video": {"id": "08fddf89-6dbe-493a-b4a8-c581d762f47a"/*"b6f2f9a5-0ae3-439d-a494-65e8b4cff076"*/, "pos": "1"},
       "ext": {"pl": "preroll", "pos": "1", "ct": "adult"}
     }, 
 
@@ -522,9 +522,9 @@ var requestData = {
 
          if(state.adsMedia.media.type == 'text/html') {
           var opt = {
-            skipTime: 3, 
+            skipTime: convertToSeconds(state.adsMedia.vastExtensions.skipTime) || 0, 
             adURL: state.adsMedia.vastClickThrough, 
-            debug: true, 
+            debug: false, 
             type: state.adsMedia.media.type
           };
 
@@ -532,13 +532,14 @@ var requestData = {
           .then(function(unit) {
             player.trigger('adsready');
 
-            unit.on('AdStart', function(e) {
-              player.trigger('AdStart');
+            unit.on('AdCreativeView', function(e) {
               player.trigger('AdCreativeView');
-              player.trigger('AdImpression');
             });
 
-            player.trigger('AdSkiped');
+            unit.on('AdStart', function(e) {
+              player.trigger('AdStart');              
+              player.trigger('AdImpression');
+            });
 
             unit.on('AdComplete', function(e) {
               player.trigger('AdComplete');
@@ -780,11 +781,15 @@ var requestData = {
           console.log('state.adsMedia.vastExtensions.skipTime', state.adsMedia.vastExtensions.skipTime);
           
           if (state.adsMedia.vastExtensions.skipButton) { // проверяем разрешен ли скип рекламы.
-              if (state.adsMedia.vastExtensions.skipTime <= 0) { // показать скип кнопку сразу
-                  skipBtnEl.css('display', 'block');
-              } else {
-                  player.on('timeupdate', checkSkip);
-              }  
+              // if (state.adsMedia.vastExtensions.skipTime <= 0) { // показать скип кнопку сразу
+              //     skipBtnEl.css('display', 'block');
+              // } else {
+              //     player.on('timeupdate', checkSkip);
+              // }  
+
+              if (state.adsMedia.vastExtensions.skipTime > 0) { // показать скип кнопку сразу
+                 player.on('timeupdate', checkSkip);
+              }
   
               player.on(skipBtnEl.get(0), 'click', skipAds);
   
