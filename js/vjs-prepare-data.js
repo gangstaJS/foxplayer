@@ -3,54 +3,139 @@ var unit, minuteBlockData = null, deferredMinuteBlock = null;
 
 // ---
 
-var REQUEST_URL = 'http://inv-nets.admixer.net/fs/dsp.aspx';
+var REQUEST_URL = 'http://inv-nets.admixer.net/ex/dsp.aspx';
+
+// var requestJSON = {
+//     "id":"", 
+//     "imp": [
+//     {
+//       "id": "preroll1",
+//       "video": {"id": "08fddf89-6dbe-493a-b4a8-c581d762f47a"/*"b6f2f9a5-0ae3-439d-a494-65e8b4cff076"*/, "pos": "1"},
+//       "ext": {"pl": "preroll", "pos": "1", "ct": "adult"}
+//     }, 
+
+//     {
+//       "id": "preroll2",
+//       "video": {"id": "b6f2f9a5-0ae3-439d-a494-65e8b4cff076", "pos": "1"},
+//       "ext": {"pl": "preroll", "pos": "1", "ct": "adult"}
+//     }, 
+
+//     {
+//       "id": "preroll3",
+//       "video": {"id": "b6f2f9a5-0ae3-439d-a494-65e8b4cff076", "pos": "1"},
+//       "ext": {"pl": "preroll", "pos": "1", "ct": "adult"}
+//     }, 
+
+//     {
+//       "id": "preroll4",
+//       "video": {"id": "b6f2f9a5-0ae3-439d-a494-65e8b4cff076", "pos": "1"},
+//       "ext": {"pl": "preroll", "pos": "1", "ct": "adult"}
+//     }, 
+
+//     {
+//       "id": "preroll5",
+//       "video": {"id": "b6f2f9a5-0ae3-439d-a494-65e8b4cff076", "pos": "1"},
+//       "ext": {"pl": "preroll", "pos": "1", "ct": "adult"}
+//     }, 
+
+//     {
+//       "id": "preroll6",
+//       "video": {"id": "b6f2f9a5-0ae3-439d-a494-65e8b4cff076", "pos": "1"},
+//       "ext": {"pl": "preroll", "pos": "1", "ct": "adult"}
+//     }],
+
+//     "ext": {
+//         "maxVideoDurationSec":62,
+//         "material": {
+//             "id" :"MaZjNUTPUW7Hhpw3mRjoc", "year":"2015"
+//         }
+//     }
+// };
 
 var requestJSON = {
-    "id":"", 
-    "imp": [
-    {
-      "id": "preroll1",
-      "video": {"id": "08fddf89-6dbe-493a-b4a8-c581d762f47a"/*"b6f2f9a5-0ae3-439d-a494-65e8b4cff076"*/, "pos": "1"},
-      "ext": {"pl": "preroll", "pos": "1", "ct": "adult"}
-    }, 
-
-    {
-      "id": "preroll2",
-      "video": {"id": "b6f2f9a5-0ae3-439d-a494-65e8b4cff076", "pos": "1"},
-      "ext": {"pl": "preroll", "pos": "1", "ct": "adult"}
-    }, 
-
-    {
-      "id": "preroll3",
-      "video": {"id": "b6f2f9a5-0ae3-439d-a494-65e8b4cff076", "pos": "1"},
-      "ext": {"pl": "preroll", "pos": "1", "ct": "adult"}
-    }, 
-
-    {
-      "id": "preroll4",
-      "video": {"id": "b6f2f9a5-0ae3-439d-a494-65e8b4cff076", "pos": "1"},
-      "ext": {"pl": "preroll", "pos": "1", "ct": "adult"}
-    }, 
-
-    {
-      "id": "preroll5",
-      "video": {"id": "b6f2f9a5-0ae3-439d-a494-65e8b4cff076", "pos": "1"},
-      "ext": {"pl": "preroll", "pos": "1", "ct": "adult"}
-    }, 
-
-    {
-      "id": "preroll6",
-      "video": {"id": "b6f2f9a5-0ae3-439d-a494-65e8b4cff076", "pos": "1"},
-      "ext": {"pl": "preroll", "pos": "1", "ct": "adult"}
-    }],
-
-    "ext": {
-        "maxVideoDurationSec":62,
-        "material": {
-            "id" :"MaZjNUTPUW7Hhpw3mRjoc", "year":"2015"
+  "id":"",
+  "imp":[
+      {
+        "id":"preroll1",
+        "video":{
+            "id":"08fddf89-6dbe-493a-b4a8-c581d762f47a",
+            "pos":"1"
+        },
+        "ext":{
+          "pl":"preroll",
+          "pos":"1",
+          "ct":"adult"
+         }
+      },
+      {
+        "id":"preroll2",
+        "video":{
+           "id":"b6f2f9a5-0ae3-439d-a494-65e8b4cff076",
+           "pos":"1"
+        },
+        "ext":{
+           "pl":"preroll",
+           "pos":"1",
+           "ct":"adult"
         }
-    }
-};
+      },
+      {
+        "id":"preroll3",
+        "video":{
+           "id":"b6f2f9a5-0ae3-439d-a494-65e8b4cff076",
+           "pos":"1"
+        },
+        "ext":{
+           "pl":"preroll",
+           "pos":"1",
+           "ct":"adult"
+        }
+      },
+      {
+        "id":"preroll4",
+        "video":{
+           "id":"b6f2f9a5-0ae3-439d-a494-65e8b4cff076",
+           "pos":"1"
+        },
+        "ext":{
+           "pl":"preroll",
+           "pos":"1",
+           "ct":"adult"
+        }
+      },
+      {
+        "id":"preroll5",
+        "video":{
+           "id":"b6f2f9a5-0ae3-439d-a494-65e8b4cff076",
+           "pos":"1"
+        },
+        "ext":{
+           "pl":"preroll",
+           "pos":"1",
+           "ct":"adult"
+        }
+      },
+      {
+        "id":"preroll6",
+        "video":{
+           "id":"b6f2f9a5-0ae3-439d-a494-65e8b4cff076",
+           "pos":"1"
+        },
+        "ext":{
+           "pl":"preroll",
+           "pos":"1",
+           "ct":"adult"
+        }
+      }
+   ],
+   "ext":{
+      "maxVideoDurationSec":62,
+      "material":{
+         "id":"MaZjNUTPUW7Hhpw3mRjoc",
+         "year":"2015"
+      }
+   }
+}
 
 var requestData = {
   callback: 'cbMixer',
@@ -321,14 +406,14 @@ var requestData = {
 
     function isTimeForPreroll() {
       var lastAds = getCookie('lastAds') || 0;
-      return ((getUnix() - lastAds) >= periodAds); // ? true : false;
+      return ((getUnix() - lastAds) >= periodAds);
     }
 
     // --
 
     function isTimeForAfterPausroll() {
       var lastAds = getCookie('lastAfterPaus') || 0;
-      return ((getUnix() - lastAds) >= periodAfterPaus); // ? true : false;
+      return ((getUnix() - lastAds) >= periodAfterPaus);
     }
 
     // --
@@ -343,7 +428,7 @@ var requestData = {
 
         switch(type) {
           case 'PRE-ROLL':
-            shouldShowAds = true; //isTimeForPreroll();
+            shouldShowAds = isTimeForPreroll();
             rollsConf = settings.pre;
           break;
 

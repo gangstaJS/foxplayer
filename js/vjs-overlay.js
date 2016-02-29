@@ -78,6 +78,14 @@
 			height: media.height+'px',
 		};
 
+		try {
+			if(media.height == media.width) {
+				media.scalable = false;
+			}
+		} catch(e) {
+			console.log(e.message);
+		}
+
 		if(media.scalable) {
 			$overlayBlock.addClass('vjs-overlay-is-scalable');
 		} else {

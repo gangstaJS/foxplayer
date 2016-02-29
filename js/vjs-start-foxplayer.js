@@ -12,7 +12,7 @@ ga('send', 'pageview');
 /**
 	OZ@EX.UA
 */
-var periodAds = 120, periodAfterPaus = 60; // 300s == 5m	
+var periodAds = 300, periodAfterPaus = 60; // 300s == 5m	
 
 // --
 
@@ -60,21 +60,21 @@ function initPlayer(node, conf, startIndex) {
 
 		// ----------------
 
-		conf.adsOptions.isMinuteBlock = true;
+		// conf.adsOptions.isMinuteBlock = false;
 
-		conf.adsOptions.pre = [
-			// {url: 'http://inv-nets.admixer.net/dsp.aspx?rct=3&zone=08fddf89-6dbe-493a-b4a8-c581d762f47a&zoneInt=9155&sect=2166&site=2030&rnd=415833950'}, 
-			// {url: 'http://inv-nets.admixer.net/dsp.aspx?rct=3&zone=a118983a-6133-4728-b303-b1cf8a2dd618&zoneInt=8858&sect=2166&site=2030&rnd=931324853'},
-			// {url: 'ads.xml'},
-			// {url: 'ads_nobanner.xml'},
-			// {url: 'http://inv-nets.admixer.net/dsp.aspx?rct=3&zone=1874abbc-5470-471a-9480-54b9c5cba17c&zoneInt=8883&sect=2009&site=1559&rnd=736270956'},
+		// conf.adsOptions.pre = [
+		// 	// {url: 'http://inv-nets.admixer.net/dsp.aspx?rct=3&zone=08fddf89-6dbe-493a-b4a8-c581d762f47a&zoneInt=9155&sect=2166&site=2030&rnd=415833950'}, 
+		// 	// {url: 'http://inv-nets.admixer.net/dsp.aspx?rct=3&zone=a118983a-6133-4728-b303-b1cf8a2dd618&zoneInt=8858&sect=2166&site=2030&rnd=931324853'},
+		// 	// {url: 'ads.xml'},
+		// 	// {url: 'ads_nobanner.xml'},
+		// 	// {url: 'http://inv-nets.admixer.net/dsp.aspx?rct=3&zone=1874abbc-5470-471a-9480-54b9c5cba17c&zoneInt=8883&sect=2009&site=1559&rnd=736270956'},
 			
-			// {url: 'http://inv-nets.admixer.net/dsp.aspx?rct=3&zone=b6f2f9a5-0ae3-439d-a494-65e8b4cff076&zoneInt=8362&sect=2166&site=2030&rnd=763821163'},
-			// {url: 'https://oz.foxis.org/ads.php'},
-			// {url: 'http://ads.adfox.ru/175105/getCode?p1=beygm&p2=emxn&pfc=a&pfb=a&plp=a&pli=a&pop=a'},
-			// {url: 'http://inv-nets.admixer.net/dsp.aspx?rct=3&zone=94e7c35f-3fc5-4e3a-97c0-c69b0f1c769a&zoneInt=8839&sect=2009&site=1559&rnd=824260880'},
-			// {url: 'ads2.xml'}
-		];
+		// 	// {url: 'http://inv-nets.admixer.net/dsp.aspx?rct=3&zone=b6f2f9a5-0ae3-439d-a494-65e8b4cff076&zoneInt=8362&sect=2166&site=2030&rnd=763821163'},
+		// 	// {url: 'https://oz.foxis.org/ads.php'},
+		// 	// {url: 'http://ads.adfox.ru/175105/getCode?p1=beygm&p2=emxn&pfc=a&pfb=a&plp=a&pli=a&pop=a'},
+		// 	// {url: 'http://inv-nets.admixer.net/dsp.aspx?rct=3&zone=94e7c35f-3fc5-4e3a-97c0-c69b0f1c769a&zoneInt=8839&sect=2009&site=1559&rnd=824260880'},
+		// 	// {url: 'ads2.xml'}
+		// ];
 
 		// conf.adsOptions.afterpaus = [
 		// 	{url: 'http://inv-nets.admixer.net/dsp.aspx?rct=3&zone=a118983a-6133-4728-b303-b1cf8a2dd618&zoneInt=8858&sect=2166&site=2030&rnd=931324853'},
@@ -89,7 +89,7 @@ function initPlayer(node, conf, startIndex) {
 		// ];
 
 		// conf.adsOptions.overlay = [
-		// 	{url: 'http://inv-nets.admixer.net/dsp.aspx?rct=3&nl=1&zone=4f542717-f910-4b8f-a83b-000bd9c0bce3&zoneInt=9110&sect=2166&site=2030&rnd=818098871'},
+		// 	// {url: 'http://inv-nets.admixer.net/dsp.aspx?rct=3&nl=1&zone=4f542717-f910-4b8f-a83b-000bd9c0bce3&zoneInt=9110&sect=2166&site=2030&rnd=818098871'},
 		// 	// img
 		// 	// {url: 'http://inv-nets.admixer.net/dsp.aspx?rct=3&nl=1&zone=2c2cce23-1ab1-4ac0-822d-34c54fe15e52&zoneInt=9120&sect=2009&site=1559&rnd=767532985'},
 
